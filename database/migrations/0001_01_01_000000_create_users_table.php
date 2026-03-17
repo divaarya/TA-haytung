@@ -17,7 +17,7 @@ $table->string('name');
 $table->string('email')->unique();
 $table->timestamp('email_verified_at')->nullable();
 $table->string('password');
-$table->enum('role', ['admin','kandang','gudang']);
+$table->enum('role',['admin','kandang','gudang','reseller']);
 $table->rememberToken();
 $table->timestamps();
         });

@@ -14,15 +14,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/profile', function (Request $request) {
-        return response()->json($request->user());
+        return response()->json([
+            'user' => $request->user()
+        ]);
     });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN ONLY
-    |--------------------------------------------------------------------------
-    */
 
     Route::middleware('role:admin')->group(function () {
 
@@ -35,12 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | GUDANG ONLY
-    |--------------------------------------------------------------------------
-    */
-
     Route::middleware('role:gudang')->group(function () {
 
         Route::get('/gudang/dashboard', function () {
@@ -52,12 +41,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | KANDANG ONLY
-    |--------------------------------------------------------------------------
-    */
-
     Route::middleware('role:kandang')->group(function () {
 
         Route::get('/kandang/dashboard', function () {
@@ -66,6 +49,15 @@ Route::middleware('auth:sanctum')->group(function () {
             ]);
         });
 
+    });
+
+    Route::middleware('role:reseller')->group(function () {
+        
+        Route::get('/reseller-dashboard', function () {
+             return response()->json([
+                 'message' => 'Welcome Reseller'
+         ]);
+      });
     });
 
 });
