@@ -3,11 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\PermintaanController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -53,11 +54,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:reseller')->group(function () {
         
-        Route::get('/reseller-dashboard', function () {
-             return response()->json([
-                 'message' => 'Welcome Reseller'
+        Route::get('/reseller-dashboard', function () 
+            {return response()->json(['message' => 'Welcome Reseller'
          ]);
       });
     });
+
+    Route::get('/permintaan', [PermintaanController::class, 'index']);
+    Route::post('/permintaan', [PermintaanController::class, 'store']);
+    Route::get('/permintaan/{id}', [PermintaanController::class, 'show']);
+    Route::put('/permintaan/{id}', [PermintaanController::class, 'update']);
+    Route::delete('/permintaan/{id}', [PermintaanController::class, 'destroy']);
+
+    // khusus admin
+    Route::middleware('role:admin')->group(function () {
+        Route::put('/permintaan/{id}/status', [PermintaanController::class, 'updateStatus']);
+    });
+
+    Route::get('/laporan', [LaporanController::class, 'index']);
+    Route::post('/laporan', [LaporanController::class, 'store']);
+    Route::get('/laporan/{id}', [LaporanController::class, 'show']);
+    Route::put('/laporan/{id}', [LaporanController::class, 'update']);
+    Route::delete('/laporan/{id}', [LaporanController::class, 'destroy']);
 
 });
