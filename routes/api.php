@@ -3,9 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\LaporanGudangController;
+use App\Http\Controllers\Api\LaporanKandangController;
 use App\Http\Controllers\Api\PermintaanController;
-
+use App\Http\Controllers\Api\StokController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -27,7 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Admin'
             ]);
         });
-
     });
 
 
@@ -38,7 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Gudang'
             ]);
         });
-
     });
 
 
@@ -49,15 +48,15 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Kandang'
             ]);
         });
-
     });
 
     Route::middleware('role:reseller')->group(function () {
-        
-        Route::get('/reseller-dashboard', function () 
-            {return response()->json(['message' => 'Welcome Reseller'
-         ]);
-      });
+
+        Route::get('/reseller-dashboard', function () {
+            return response()->json([
+                'message' => 'Welcome Reseller'
+            ]);
+        });
     });
 
     Route::get('/permintaan', [PermintaanController::class, 'index']);
@@ -71,10 +70,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/permintaan/{id}/status', [PermintaanController::class, 'updateStatus']);
     });
 
-    Route::get('/laporan', [LaporanController::class, 'index']);
-    Route::post('/laporan', [LaporanController::class, 'store']);
-    Route::get('/laporan/{id}', [LaporanController::class, 'show']);
-    Route::put('/laporan/{id}', [LaporanController::class, 'update']);
-    Route::delete('/laporan/{id}', [LaporanController::class, 'destroy']);
+    Route::get('/laporan-kandang', [LaporanKandangController::class, 'index']);
+    Route::post('/laporan-kandang', [LaporanKandangController::class, 'store']);
+    Route::get('/laporan-kandang/{id}', [LaporanKandangController::class, 'show']);
+    Route::put('/laporan-kandang/{id}', [LaporanKandangController::class, 'update']);
+    Route::delete('/laporan-kandang/{id}', [LaporanKandangController::class, 'destroy']);
 
+    Route::get('/laporan-gudang', [LaporanGudangController::class, 'index']);
+    Route::post('/laporan-gudang', [LaporanGudangController::class, 'store']);
+    Route::get('/laporan-gudang/{id}', [LaporanGudangController::class, 'show']);
+    Route::put('/laporan-gudang/{id}', [LaporanGudangController::class, 'update']);
+    Route::delete('/laporan-gudang/{id}', [LaporanGudangController::class, 'destroy']);
+
+    Route::get('/stok', [StokController::class, 'index']);
+    Route::post('/stok', [StokController::class, 'store']);
+    Route::get('/stok/{id}', [StokController::class, 'show']);
+    Route::put('/stok/{id}', [StokController::class, 'update']);
+    Route::delete('/stok/{id}', [StokController::class, 'destroy']);
 });
