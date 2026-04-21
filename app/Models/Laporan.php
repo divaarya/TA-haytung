@@ -14,12 +14,13 @@ class Laporan extends Model
     'judul',
     'deskripsi',
     'jenis_laporan',
-    'tanggal',
+    'dc',
     'jumlah_ayam_mati',
     'jumlah_ayam_hidup',
     'hari_ke',
     'estimasi_panen',
-    'foto'
+    'foto',
+    'tanggal'
 ];
 
     public function user()

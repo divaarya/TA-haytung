@@ -15,7 +15,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'foto'
     ];
 
     protected $hidden = [
@@ -26,4 +27,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function laporans()
+{
+    return $this->hasMany(Laporan::class);
+}
+
+public function permintaans()
+{
+    return $this->hasMany(Permintaan::class);
+}
+
+public function events()
+{
+    return $this->hasMany(Event::class);
+}
 }

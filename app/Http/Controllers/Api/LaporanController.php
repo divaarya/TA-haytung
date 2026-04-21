@@ -5,28 +5,105 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Laporan;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class LaporanController extends Controller
 {
 
+    // GET ALL
+    public function index(Request $request)
+{
+    $user = $request->user();
+    $query = Laporan::query();
+
+    // filter berdasarkan role
+    if ($user->role == 'kandang') {
+        $query->where('jenis_laporan', 'kandang');
+    } elseif ($user->role == 'gudang') {
+        $query->where('jenis_laporan', 'gudang');
+    }
+
+    if ($request->dc) {
+        $query->where('dc', $request->dc);
+    }
+
+    return response()->json([
+        'data' => $query->get()
+    ]);
+}
+
+    // GET DETAIL
+    public function show($id)
+    {
+        $laporan = Laporan::findOrFail($id);
+
+        return response()->json([
+            'data' => $laporan,
+            'foto_url' => $laporan->foto ? asset('storage/' . $laporan->foto) : null
+        ]);
+    }
+
+    // POST
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'judul' => 'required|string|max:255',
+        'deskripsi' => 'required|string',
+        'jenis_laporan' => 'required|in:kandang,gudang',
+        'tanggal' => 'required|date',
+
+        'dc' => 'required|in:kandang,gudang,reseller',
+
+        'jumlah_ayam_mati' => 'nullable|integer',
+        'jumlah_ayam_hidup' => 'nullable|integer',
+        'hari_ke' => 'nullable|integer',
+        'estimasi_panen' => 'nullable|date',
+
+        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+    ]);
+
+    if (isset($validated['hari_ke']) && $validated['hari_ke'] <= 30) {
+    $validated['estimasi_panen'] = Carbon::now()->addDays(30 - $validated['hari_ke']);
+}
+
+    // upload foto
+    if ($request->hasFile('foto')) {
+        $validated['foto'] = $request->file('foto')->store('laporan', 'public');
+    }
+
+    // tambah user_id
+    $validated['user_id'] = $request->user()->id;
+
+    $laporan = Laporan::create($validated);
+
+    return response()->json([
+        'message' => 'Laporan berhasil dibuat',
+        'data' => $laporan,
+        'foto_url' => $laporan->foto ? asset('storage/' . $laporan->foto) : null
+    ]);
+}
+
+    // UPDATE
    public function update(Request $request, $id)
 {
     $laporan = Laporan::findOrFail($id);
 
-    // PROTEKSI (biar user cuma bisa edit miliknya)
+    // proteksi user
     if ($laporan->user_id != $request->user()->id) {
         return response()->json([
             'message' => 'Akses ditolak'
         ], 403);
     }
 
-    // VALIDASI
     $validated = $request->validate([
         'judul' => 'sometimes|required|string|max:255',
         'deskripsi' => 'sometimes|required|string',
         'jenis_laporan' => 'sometimes|required|in:kandang,gudang',
         'tanggal' => 'sometimes|required|date',
 
+        'dc' => 'sometimes|required|in:kandang,gudang,reseller',
+
         'jumlah_ayam_mati' => 'nullable|integer',
         'jumlah_ayam_hidup' => 'nullable|integer',
         'hari_ke' => 'nullable|integer',
@@ -35,99 +112,50 @@ class LaporanController extends Controller
         'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
     ]);
 
-    $path = $laporan->foto;
+    if (!empty($validated['hari_ke'])) {
+    $validated['estimasi_panen'] = Carbon::now()->addDays(30 - $validated['hari_ke']);
+}
 
+    // handle foto
     if ($request->hasFile('foto')) {
-        $path = $request->file('foto')->store('laporan', 'public');
+
+        if ($laporan->foto && \Storage::disk('public')->exists($laporan->foto)) {
+            \Storage::disk('public')->delete($laporan->foto);
+        }
+
+        $validated['foto'] = $request->file('foto')->store('laporan', 'public');
     }
 
-    $validated['foto'] = $path;
-
-    // UPDATE
     $laporan->update($validated);
 
     return response()->json([
         'message' => 'Laporan berhasil diupdate',
         'data' => $laporan,
-        'foto_url' => $path ? asset('storage/' . $path) : null
+        'foto_url' => $laporan->foto ? asset('storage/' . $laporan->foto) : null
     ]);
 }
 
-public function destroy($id)
-{
-    $laporan = Laporan::findOrFail($id);
-    $laporan->delete();
+    // DELETE
+    public function destroy(Request $request, $id)
+    {
+        $laporan = Laporan::findOrFail($id);
 
-    return response()->json([
-        'message' => 'Laporan berhasil dihapus'
-    ]);
-}
+        //  proteksi user
+        if ($laporan->user_id != $request->user()->id) {
+            return response()->json([
+                'message' => 'Akses ditolak'
+            ], 403);
+        }
 
-    public function index(Request $request)
-{
-    $user = $request->user();
+        // hapus foto 
+        if ($laporan->foto && Storage::disk('public')->exists($laporan->foto)) {
+            Storage::disk('public')->delete($laporan->foto);
+        }
 
-    if ($user->role == 'kandang') {
-        $data = Laporan::where('jenis_laporan', 'kandang')->get();
-    } elseif ($user->role == 'gudang') {
-        $data = Laporan::where('jenis_laporan', 'gudang')->get();
-    } else {
-        $data = Laporan::all();
+        $laporan->delete();
+
+        return response()->json([
+            'message' => 'Laporan berhasil dihapus'
+        ]);
     }
-
-    return response()->json([
-        'data' => $data
-    ]);
-}
-
-    public function store(Request $request)
-{
-    $request->validate([
-        'judul' => 'required',
-        'deskripsi' => 'required',
-        'jenis_laporan' => 'required|in:kandang,gudang',
-        'tanggal' => 'required|date',
-
-        'jumlah_ayam_mati' => 'nullable|integer',
-        'jumlah_ayam_hidup' => 'nullable|integer',
-        'hari_ke' => 'nullable|integer',
-        'estimasi_panen' => 'nullable|date',
-
-        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
-    ]);
-
-    $path = null;
-    if ($request->hasFile('foto')) {
-        $path = $request->file('foto')->store('laporan', 'public');
-    }
-
-    $laporan = Laporan::create([
-        'user_id' => $request->user()->id,
-        'judul' => $request->judul,
-        'deskripsi' => $request->deskripsi,
-        'jenis_laporan' => $request->jenis_laporan,
-        'tanggal' => $request->tanggal,
-
-        'jumlah_ayam_mati' => $request->jumlah_ayam_mati,
-        'jumlah_ayam_hidup' => $request->jumlah_ayam_hidup,
-        'hari_ke' => $request->hari_ke,
-        'estimasi_panen' => $request->estimasi_panen,
-
-        'foto' => $path
-    ]);
-
-    return response()->json([
-        'message' => 'Laporan berhasil dibuat',
-        'data' => $laporan
-    ]);
-}
-
-    public function show($id)
-{
-    $laporan = Laporan::findOrFail($id);
-
-    return response()->json([
-        'data' => $laporan
-    ]);
-}
 }

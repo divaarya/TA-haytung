@@ -21,6 +21,8 @@ return new class extends Migration
 
     $table->enum('jenis_laporan', ['kandang','gudang']);
 
+    $table->enum('dc', ['kandang','gudang','reseller']);
+
     $table->integer('jumlah_ayam_mati')->nullable();
     $table->integer('jumlah_ayam_hidup')->nullable();
     $table->integer('hari_ke')->nullable();
