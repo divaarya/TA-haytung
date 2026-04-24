@@ -13,6 +13,12 @@ class Permintaan extends Model
         'jumlah',
         'harga',
         'status',
+        'alasan_tolak',
         'tanggal'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

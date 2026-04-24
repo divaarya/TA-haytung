@@ -8,17 +8,23 @@ use App\Models\Permintaan;
 
 class PermintaanController extends Controller
 {
-    
     public function index(Request $request)
     {
         $user = $request->user();
 
-        // kalau admin lihat semua
         if ($user->role == 'admin') {
-            $data = Permintaan::all();
+            $data = Permintaan::with('user')->get()->map(function ($item) {
+                $item->role = $item->user->role;
+                return $item;
+            });
         } else {
-            // selain admin hanya lihat milik sendiri
-            $data = Permintaan::where('user_id', $user->id)->get();
+            $data = Permintaan::with('user')
+                ->where('user_id', $user->id)
+                ->get()
+                ->map(function ($item) {
+                    $item->role = $item->user->role;
+                    return $item;
+                });
         }
 
         return response()->json([
@@ -26,7 +32,6 @@ class PermintaanController extends Controller
         ]);
     }
 
-    // CREATE
     public function store(Request $request)
     {
         $request->validate([
@@ -53,39 +58,36 @@ class PermintaanController extends Controller
         ]);
     }
 
-    // GET DETAIL
     public function show($id)
     {
-        $permintaan = Permintaan::findOrFail($id);
+        $permintaan = Permintaan::with('user')->findOrFail($id);
+        $permintaan->role = $permintaan->user->role;
 
-         return response()->json([
+        return response()->json([
             'data' => $permintaan
         ]);
     }
 
     public function update(Request $request, $id)
-{
-    $permintaan = Permintaan::findOrFail($id);
+    {
+        $permintaan = Permintaan::findOrFail($id);
 
-    // VALIDASI
-    $validated = $request->validate([
-        'nama_permintaan' => 'sometimes|required|string|max:255',
-        'tipe' => 'sometimes|required|in:barang,dana',
-        'jumlah' => 'nullable|integer',
-        'harga' => 'nullable|numeric',
-        'tanggal' => 'sometimes|required|date'
-    ]);
+        $validated = $request->validate([
+            'nama_permintaan' => 'sometimes|required|string|max:255',
+            'tipe' => 'sometimes|required|in:barang,dana',
+            'jumlah' => 'nullable|integer',
+            'harga' => 'nullable|numeric',
+            'tanggal' => 'sometimes|required|date'
+        ]);
 
-    // UPDATE DATA
-    $permintaan->update($validated);
+        $permintaan->update($validated);
 
-    return response()->json([
-        'message' => 'Permintaan berhasil diupdate',
-        'data' => $permintaan
-    ]);
-}
+        return response()->json([
+            'message' => 'Permintaan berhasil diupdate',
+            'data' => $permintaan
+        ]);
+    }
 
-    // DELETE
     public function destroy($id)
     {
         $permintaan = Permintaan::findOrFail($id);
@@ -96,17 +98,18 @@ class PermintaanController extends Controller
         ]);
     }
 
-    //  UPDATE STATUS (KHUSUS ADMIN)
     public function updateStatus(Request $request, $id)
     {
         $permintaan = Permintaan::findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:pending,disetujui,ditolak'
+            'status' => 'required|in:pending,disetujui,ditolak',
+            'alasan_tolak' => 'nullable|string'
         ]);
 
         $permintaan->update([
-            'status' => $request->status
+            'status' => $request->status,
+            'alasan_tolak' => $request->alasan_tolak
         ]);
 
         return response()->json([
