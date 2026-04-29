@@ -72,6 +72,12 @@ class PermintaanController extends Controller
     {
         $permintaan = Permintaan::findOrFail($id);
 
+        if ($permintaan->user_id != $request->user()->id) {
+        return response()->json([
+           'message' => 'Akses ditolak'
+        ], 403);
+    }
+
         $validated = $request->validate([
             'nama_permintaan' => 'sometimes|required|string|max:255',
             'tipe' => 'sometimes|required|in:barang,dana',
@@ -88,19 +94,25 @@ class PermintaanController extends Controller
         ]);
     }
 
+    // DELETE
     public function destroy($id)
     {
         $permintaan = Permintaan::findOrFail($id);
         $permintaan->delete();
 
-        return response()->json([
-            'message' => 'Permintaan berhasil dihapus'
-        ]);
-    }
+    return response()->json([
+        'message' => 'Permintaan berhasil dihapus'
+    ]);
+}
 
     public function updateStatus(Request $request, $id)
     {
         $permintaan = Permintaan::findOrFail($id);
+        if ($request->user()->role != 'admin' && $permintaan->user_id != $request->user()->id) {
+            return response()->json([
+                'message' => 'Akses ditolak'
+        ], 403);
+    }
 
         $request->validate([
             'status' => 'required|in:pending,disetujui,ditolak',

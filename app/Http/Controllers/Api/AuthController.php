@@ -10,39 +10,44 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    // REGISTER
     public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required|in:admin,kandang,gudang,reseller'
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6',
+        'role' => 'required|in:admin,kandang,gudang,reseller',
+        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role
-        ]);
-
-        return response()->json([
-            'message' => 'User berhasil dibuat',
-            'user' => $user
-        ]);
+    if ($request->hasFile('foto')) {
+        $validated['foto'] = $request->file('foto')->store('users', 'public');
     }
 
+    $validated['password'] = \Hash::make($validated['password']);
+
+    $user = \App\Models\User::create($validated);
+
+    return response()->json([
+        'message' => 'User berhasil dibuat',
+        'data' => $user,
+        'foto_url' => $user->foto ? asset('storage/'.$user->foto) : null
+    ]);
+}
+
+    // LOGIN
     public function login(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        if (!Auth::attempt($request->only('email','password'))) {
+        if (!Auth::attempt($validated)) {
             return response()->json([
                 'message' => 'Email atau password salah'
-            ],401);
+            ], 401);
         }
 
         $user = Auth::user();
@@ -53,17 +58,41 @@ class AuthController extends Controller
             'message' => 'Login berhasil',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
+            'data' => $user,
             'role' => $user->role
         ]);
     }
 
+    // LOGOUT
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
 
         return response()->json([
             'message' => 'Logout berhasil'
+        ]);
+    }
+
+    // UPDATE PROFILE
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
+
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')->store('users', 'public');
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Profile berhasil diupdate',
+            'data' => $user,
+            'foto_url' => $user->foto ? asset('storage/' . $user->foto) : null
         ]);
     }
 }
