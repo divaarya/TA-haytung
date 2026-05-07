@@ -1,0 +1,2296 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Peternakan",
+        "description": "Dokumentasi API Peternakan",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Server"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register user",
+                "operationId": "5e9dd82c858753ad481f146678e34951",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Arya"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "arya@mail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "kandang",
+                                        "enum": [
+                                            "admin",
+                                            "kandang",
+                                            "gudang",
+                                            "reseller"
+                                        ]
+                                    },
+                                    "foto": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "example": "http://localhost/storage/users/abc.jpg",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login user",
+                "operationId": "fd38eab35a3cc28d00ada587f6955506",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "arya@mail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login berhasil"
+                                        },
+                                        "access_token": {
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "kandang"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Email atau password salah"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout user",
+                "operationId": "d2f0239468d539b07f33e62fab239518",
+                "responses": {
+                    "200": {
+                        "description": "Logout berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logout berhasil"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/update-profile": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Update profile user",
+                "operationId": "1bd0584bb71043331c21cedcc7d515a0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Arya Update"
+                                    },
+                                    "foto": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile berhasil diupdate"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Ambil data dashboard",
+                "description": "Menampilkan ringkasan data laporan, event, dan permintaan",
+                "operationId": "104b9e9a4ff79eb0ba3b527dfa8615e1",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Dashboard"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/event": {
+            "get": {
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Ambil semua event",
+                "operationId": "8f7a594c8a56777b32e514a3b5168aef",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Event"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Buat event (Admin only)",
+                "operationId": "dba27c752da9912abcf624807ba03ebe",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EventRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Event berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Event berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Event"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/event/{id}": {
+            "get": {
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Detail event",
+                "operationId": "e5dedf9cd4c21b7d9322beaba681b165",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Event"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Update event (Admin only)",
+                "operationId": "e23ff1d68c3ddaad63d4cce369f546f1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EventRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Event berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Event berhasil diupdate"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Event"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Hapus event (Admin only)",
+                "operationId": "9b2c8a7acab1d874bd6261f0ecfae60e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Event dihapus"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/event/{id}/status": {
+            "put": {
+                "tags": [
+                    "Event"
+                ],
+                "summary": "Update status event (Admin only)",
+                "operationId": "49c7e52d1cfb0f4f0c277c60b4724c18",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "acc",
+                                        "enum": [
+                                            "pending",
+                                            "acc",
+                                            "reject"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status event diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Status event diupdate"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Event"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-gudang": {
+            "get": {
+                "tags": [
+                    "Laporan Gudang"
+                ],
+                "summary": "Ambil semua laporan gudang",
+                "operationId": "9ef8452381f76313f358b5220e8ec5cc",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LaporanGudang"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Laporan Gudang"
+                ],
+                "summary": "Buat laporan gudang (khusus role gudang)",
+                "operationId": "4f7ab4b4c3930131beb5662040b41056",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "tanggal_mulai",
+                                    "tanggal_selesai",
+                                    "stok_awal",
+                                    "stok_masuk",
+                                    "jumlah_daging_jual"
+                                ],
+                                "properties": {
+                                    "tanggal_mulai": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-05-01"
+                                    },
+                                    "tanggal_selesai": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-05-05"
+                                    },
+                                    "stok_awal": {
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "stok_masuk": {
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "jumlah_daging_jual": {
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "stok_akhir": {
+                                        "type": "integer",
+                                        "example": 120,
+                                        "nullable": true
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "example": "Stok aman",
+                                        "nullable": true
+                                    },
+                                    "foto": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Laporan gudang berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/LaporanGudang"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-gudang/{id}": {
+            "get": {
+                "tags": [
+                    "Laporan Gudang"
+                ],
+                "summary": "Detail laporan gudang",
+                "operationId": "fffd684d65c8536bc77e9c5307c10aeb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/LaporanGudang"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Laporan Gudang"
+                ],
+                "summary": "Update laporan gudang",
+                "operationId": "9c4841f17923f10463e29ff946335bd9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "tanggal_mulai": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "tanggal_selesai": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "stok_awal": {
+                                        "type": "integer"
+                                    },
+                                    "stok_masuk": {
+                                        "type": "integer"
+                                    },
+                                    "jumlah_daging_jual": {
+                                        "type": "integer"
+                                    },
+                                    "stok_akhir": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "foto": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Laporan gudang berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/LaporanGudang"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Laporan Gudang"
+                ],
+                "summary": "Hapus laporan gudang",
+                "operationId": "8fc96d2fbc3b2a3cbc5ad2c6cacb4f67",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan gudang berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-kandang": {
+            "get": {
+                "tags": [
+                    "Laporan Kandang"
+                ],
+                "summary": "Ambil semua laporan kandang",
+                "operationId": "ce55af393d0e32d0f4e6b8aee51caa83",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LaporanKandang"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Laporan Kandang"
+                ],
+                "summary": "Buat laporan kandang (khusus role kandang)",
+                "operationId": "8a240b8b728a1dda9a307f9c25c147c4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "tanggal_mulai",
+                                    "tanggal_selesai",
+                                    "jumlah_ayam_awal",
+                                    "jumlah_ayam_mati",
+                                    "umur_ayam",
+                                    "rata_rata_bobot"
+                                ],
+                                "properties": {
+                                    "tanggal_mulai": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-05-01"
+                                    },
+                                    "tanggal_selesai": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-05-05"
+                                    },
+                                    "jumlah_ayam_awal": {
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "jumlah_ayam_mati": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "umur_ayam": {
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "rata_rata_bobot": {
+                                        "type": "number",
+                                        "example": 1.5
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "example": "Kondisi baik",
+                                        "nullable": true
+                                    },
+                                    "foto": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Laporan kandang berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/LaporanKandang"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/laporan-kandang/{id}": {
+            "get": {
+                "tags": [
+                    "Laporan Kandang"
+                ],
+                "summary": "Detail laporan kandang",
+                "operationId": "c2991f81e569f135b65f90b5bd2e8d96",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/LaporanKandang"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Laporan Kandang"
+                ],
+                "summary": "Update laporan kandang",
+                "operationId": "256a32158fd2e003bc04737a90c73982",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "tanggal_mulai": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "tanggal_selesai": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "jumlah_ayam_awal": {
+                                        "type": "integer"
+                                    },
+                                    "jumlah_ayam_mati": {
+                                        "type": "integer"
+                                    },
+                                    "umur_ayam": {
+                                        "type": "integer"
+                                    },
+                                    "rata_rata_bobot": {
+                                        "type": "number"
+                                    },
+                                    "catatan": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "foto": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Laporan kandang berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/LaporanKandang"
+                                        },
+                                        "foto_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Laporan Kandang"
+                ],
+                "summary": "Hapus laporan kandang",
+                "operationId": "a8e51f73cae83e1d5d756d97f25917ce",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan kandang berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permintaan": {
+            "get": {
+                "tags": [
+                    "Permintaan"
+                ],
+                "summary": "Ambil semua permintaan",
+                "operationId": "d6ad8fee6da3fb627ab746a29643c4d9",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Permintaan"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Permintaan"
+                ],
+                "summary": "Buat permintaan baru",
+                "operationId": "58fe75582cb9b5b96c85b01cecd620a4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermintaanRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Permintaan berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permintaan berhasil dibuat"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Permintaan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permintaan/{id}": {
+            "get": {
+                "tags": [
+                    "Permintaan"
+                ],
+                "summary": "Detail permintaan",
+                "operationId": "94ddbafcb3091c4d9295ce72b266c55c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Permintaan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Permintaan"
+                ],
+                "summary": "Update permintaan",
+                "operationId": "6fb27aed04d417398e41bc99cb5122a0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermintaanRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permintaan berhasil diupdate"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Permintaan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Permintaan"
+                ],
+                "summary": "Hapus permintaan",
+                "operationId": "21f70cf0ab41b61f10ac4596e7704acd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Permintaan berhasil dihapus"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permintaan/{id}/status": {
+            "put": {
+                "tags": [
+                    "Permintaan"
+                ],
+                "summary": "Update status permintaan",
+                "operationId": "7eec60d3eb9c83b26e59b6b734a1ea3c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "disetujui",
+                                        "enum": [
+                                            "pending",
+                                            "disetujui",
+                                            "ditolak"
+                                        ]
+                                    },
+                                    "alasan_tolak": {
+                                        "type": "string",
+                                        "example": "Stok tidak tersedia",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Status berhasil diupdate"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Permintaan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stok": {
+            "get": {
+                "tags": [
+                    "Stok"
+                ],
+                "summary": "Ambil semua stok",
+                "operationId": "4f802ac922cfc1f6579422c504297d94",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Stok"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Stok"
+                ],
+                "summary": "Tambah stok (khusus gudang)",
+                "operationId": "d39fe9f7bb509a61f967972a88ecbd9c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StokRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Stok berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Stok berhasil ditambahkan"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Stok"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/stok/{id}": {
+            "get": {
+                "tags": [
+                    "Stok"
+                ],
+                "summary": "Detail stok",
+                "operationId": "5c561a6894dc0eb087e1e8a6a82ad4f5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Stok"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Stok"
+                ],
+                "summary": "Update stok (khusus gudang)",
+                "operationId": "08ba5cd9a74232abb7d94e550d762274",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StokRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stok berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Stok berhasil diupdate"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Stok"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Stok"
+                ],
+                "summary": "Hapus stok (gudang & admin)",
+                "operationId": "c2c738d8e5d60839a577ad1810fda6fe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Stok berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "404": {
+                        "description": "Tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Arya"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "arya@mail.com"
+                    },
+                    "role": {
+                        "type": "string",
+                        "example": "kandang"
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "users/abc.jpg",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Dashboard": {
+                "properties": {
+                    "total_laporan": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "total_event": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "total_permintaan": {
+                        "type": "integer",
+                        "example": 8
+                    },
+                    "ayam_mati": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "ayam_hidup": {
+                        "type": "integer",
+                        "example": 150
+                    },
+                    "permintaan_pending": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "event_pending": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "Event": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "role": {
+                        "type": "string",
+                        "example": "kandang"
+                    },
+                    "nama_kegiatan": {
+                        "type": "string",
+                        "example": "Panen Ayam"
+                    },
+                    "deskripsi": {
+                        "type": "string",
+                        "example": "Panen periode Mei",
+                        "nullable": true
+                    },
+                    "jumlah": {
+                        "type": "integer",
+                        "example": 100,
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "pending",
+                        "enum": [
+                            "pending",
+                            "acc",
+                            "reject"
+                        ]
+                    },
+                    "tanggal": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-01"
+                    }
+                },
+                "type": "object"
+            },
+            "EventRequest": {
+                "required": [
+                    "nama_kegiatan",
+                    "tanggal",
+                    "role"
+                ],
+                "properties": {
+                    "nama_kegiatan": {
+                        "type": "string",
+                        "example": "Panen Ayam"
+                    },
+                    "deskripsi": {
+                        "type": "string",
+                        "example": "Panen periode Mei",
+                        "nullable": true
+                    },
+                    "jumlah": {
+                        "type": "integer",
+                        "example": 100,
+                        "nullable": true
+                    },
+                    "tanggal": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-01"
+                    },
+                    "role": {
+                        "type": "string",
+                        "example": "kandang",
+                        "enum": [
+                            "kandang",
+                            "gudang",
+                            "reseller"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "LaporanGudang": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tanggal_mulai": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-01"
+                    },
+                    "tanggal_selesai": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-05"
+                    },
+                    "stok_awal": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "stok_masuk": {
+                        "type": "integer",
+                        "example": 50
+                    },
+                    "jumlah_daging_jual": {
+                        "type": "integer",
+                        "example": 30
+                    },
+                    "stok_akhir": {
+                        "type": "integer",
+                        "example": 120
+                    },
+                    "catatan": {
+                        "type": "string",
+                        "example": "Stok aman",
+                        "nullable": true
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "laporan_gudang/abc.jpg",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "LaporanKandang": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tanggal_mulai": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-01"
+                    },
+                    "tanggal_selesai": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-05"
+                    },
+                    "jumlah_ayam_awal": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "jumlah_ayam_mati": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "umur_ayam": {
+                        "type": "integer",
+                        "example": 30
+                    },
+                    "rata_rata_bobot": {
+                        "type": "number",
+                        "example": 1.5
+                    },
+                    "catatan": {
+                        "type": "string",
+                        "example": "Kondisi baik",
+                        "nullable": true
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "laporan_kandang/abc.jpg",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Permintaan": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nama_permintaan": {
+                        "type": "string",
+                        "example": "Pakan Ayam"
+                    },
+                    "tipe": {
+                        "type": "string",
+                        "example": "barang",
+                        "enum": [
+                            "barang",
+                            "dana"
+                        ]
+                    },
+                    "jumlah": {
+                        "type": "integer",
+                        "example": 10,
+                        "nullable": true
+                    },
+                    "harga": {
+                        "type": "number",
+                        "example": 150000,
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "pending",
+                        "enum": [
+                            "pending",
+                            "disetujui",
+                            "ditolak"
+                        ]
+                    },
+                    "alasan_tolak": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "tanggal": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-04-20"
+                    },
+                    "user": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "role": {
+                                "type": "string",
+                                "example": "admin"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "PermintaanRequest": {
+                "required": [
+                    "nama_permintaan",
+                    "tipe",
+                    "tanggal"
+                ],
+                "properties": {
+                    "nama_permintaan": {
+                        "type": "string",
+                        "example": "Pakan Ayam"
+                    },
+                    "tipe": {
+                        "type": "string",
+                        "example": "barang",
+                        "enum": [
+                            "barang",
+                            "dana"
+                        ]
+                    },
+                    "jumlah": {
+                        "type": "integer",
+                        "example": 10,
+                        "nullable": true
+                    },
+                    "harga": {
+                        "type": "number",
+                        "example": 150000,
+                        "nullable": true
+                    },
+                    "tanggal": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-04-20"
+                    }
+                },
+                "type": "object"
+            },
+            "Stok": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "jenis": {
+                        "type": "string",
+                        "example": "whole",
+                        "enum": [
+                            "whole",
+                            "parting"
+                        ]
+                    },
+                    "berat_per_item": {
+                        "type": "number",
+                        "example": 1.5
+                    },
+                    "jumlah_stok": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "estimasi_total_berat": {
+                        "type": "number",
+                        "example": 150
+                    },
+                    "tanggal_update": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-06"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "aman",
+                        "enum": [
+                            "aman",
+                            "menipis",
+                            "habis"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "StokRequest": {
+                "required": [
+                    "jenis",
+                    "berat_per_item",
+                    "jumlah_stok",
+                    "estimasi_total_berat",
+                    "tanggal_update",
+                    "status"
+                ],
+                "properties": {
+                    "jenis": {
+                        "type": "string",
+                        "example": "whole",
+                        "enum": [
+                            "whole",
+                            "parting"
+                        ]
+                    },
+                    "berat_per_item": {
+                        "type": "number",
+                        "example": 1.5
+                    },
+                    "jumlah_stok": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "estimasi_total_berat": {
+                        "type": "number",
+                        "example": 150
+                    },
+                    "tanggal_update": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-05-06"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "aman",
+                        "enum": [
+                            "aman",
+                            "menipis",
+                            "habis"
+                        ]
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboard"
+        },
+        {
+            "name": "Event",
+            "description": "Event"
+        },
+        {
+            "name": "Laporan Gudang",
+            "description": "Laporan Gudang"
+        },
+        {
+            "name": "Laporan Kandang",
+            "description": "Laporan Kandang"
+        },
+        {
+            "name": "Permintaan",
+            "description": "Permintaan"
+        },
+        {
+            "name": "Stok",
+            "description": "Stok"
+        }
+    ]
+}
