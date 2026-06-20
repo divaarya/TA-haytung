@@ -39,6 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Admin'
             ]);
         });
+	Route::post('/users', [AuthController::class, 'register']);
+	Route::delete('/users/{id}', fn($id) => \App\Models\User::destroy($id));
     });
 
     Route::middleware('role:gudang')->group(function () {
@@ -100,6 +102,7 @@ Route::middleware('role:admin')->group(function () {
     Route::put('/event/{id}', [EventController::class, 'update']);
     Route::delete('/event/{id}', [EventController::class, 'destroy']);
     Route::put('/event/{id}/status', [EventController::class, 'updateStatus']);
+    Route::get('/users', fn() => response()->json(\App\Models\User::all()));
 });
 
     // LAPORAN

@@ -18,7 +18,9 @@ class AuthController extends Controller
         'email' => 'required|email|unique:users',
         'password' => 'required|min:6',
         'role' => 'required|in:admin,kandang,gudang,reseller',
-        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+	'no_hp' => 'nullable|string|max:20',
+	'status' => 'nullable|in:Aktif,Cuti',
     ]);
 
     if ($request->hasFile('foto')) {
