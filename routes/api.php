@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PermintaanController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\StokController;
+use App\Http\Controllers\Api\KaryawanController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -92,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/permintaan/{id}/status', [PermintaanController::class, 'updateStatus']);
     });
 
+    
     // EVENT 
 Route::get('/event', [EventController::class, 'index']);
 Route::get('/event/{id}', [EventController::class, 'show']);
@@ -103,6 +105,17 @@ Route::middleware('role:admin')->group(function () {
     Route::delete('/event/{id}', [EventController::class, 'destroy']);
     Route::put('/event/{id}/status', [EventController::class, 'updateStatus']);
     Route::get('/users', fn() => response()->json(\App\Models\User::all()));
+});
+
+// KARYAWAN (khusus admin)
+Route::middleware('role:admin')->group(function () {
+
+    Route::get('/karyawan', [KaryawanController::class, 'index']);
+    Route::post('/karyawan', [KaryawanController::class, 'store']);
+    Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
+    Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
+    Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
+
 });
 
     // LAPORAN
@@ -124,4 +137,6 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/stok/{id}', [StokController::class, 'show']);
     Route::put('/stok/{id}', [StokController::class, 'update']);
     Route::delete('/stok/{id}', [StokController::class, 'destroy']);
+
+
 });
