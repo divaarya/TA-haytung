@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\StokController;
 use App\Http\Controllers\Api\KaryawanController;
+use App\Http\Controllers\Api\PesananController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -137,6 +138,13 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/stok/{id}', [StokController::class, 'show']);
     Route::put('/stok/{id}', [StokController::class, 'update']);
     Route::delete('/stok/{id}', [StokController::class, 'destroy']);
+
+    //PESANAN
+    Route::get('/pesanan', [PesananController::class, 'index']);
+    Route::post('/pesanan', [PesananController::class, 'store']);
+    Route::get('/pesanan/{id}', [PesananController::class, 'show']);
+    Route::put('/pesanan/{id}', [PesananController::class, 'update']);
+    Route::delete('/pesanan/{id}', [PesananController::class, 'destroy']);
 
 
 });
