@@ -10,12 +10,8 @@ class LaporanGudang extends Model
 
     protected $fillable = [
         'user_id',
-        'tanggal_mulai',
-        'tanggal_selesai',
-        'stok_awal',
-        'stok_masuk',
-        'jumlah_daging_jual',
-        'stok_akhir',
+        'tanggal',
+        'tempat_pendistribusian',
         'catatan',
         'foto',
     ];
@@ -23,5 +19,10 @@ class LaporanGudang extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(LaporanGudangItem::class);
     }
 }

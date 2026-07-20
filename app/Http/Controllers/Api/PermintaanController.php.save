@@ -12,8 +12,6 @@ class PermintaanController extends Controller
     {
         $user = $request->user();
 
-	$query = Permintaan::with('user')->orderByDesc('tanggal');
-
         if ($user->role == 'admin') {
             $data = Permintaan::with('user')->get()->map(function ($item) {
                 $item->role = $item->user->role;
@@ -29,7 +27,6 @@ class PermintaanController extends Controller
                 });
         }
 
-
         return response()->json([
             'data' => $data
         ]);
@@ -39,27 +36,7 @@ class PermintaanController extends Controller
     {
         $request->validate([
             'nama_permintaan' => 'required',
-            'tipe' => 'required|in:barang,dana',
-            'jumlah' => 'nullable|integer',
-            'harga' => 'nullable|numeric',
-            'tanggal' => 'required|date'
-        ]);
-
-        $data = Permintaan::create([
-            'user_id' => $request->user()->id,
-            'nama_permintaan' => $request->nama_permintaan,
-            'tipe' => $request->tipe,
-            'jumlah' => $request->jumlah,
-            'harga' => $request->harga,
-            'tanggal' => $request->tanggal,
-            'status' => 'pending'
-        ]);
-
-        return response()->json([
-            'message' => 'Permintaan berhasil dibuat',
-            'data' => $data
-        ]);
-    }
+            'tipe' => 'required|in:barang,
 
     public function show($id)
     {

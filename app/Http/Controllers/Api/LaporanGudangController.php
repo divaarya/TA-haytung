@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\LaporanGudang;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class LaporanGudangController extends Controller
 {
@@ -14,9 +15,9 @@ class LaporanGudangController extends Controller
         $user = $request->user();
 
         if ($user->role === 'gudang') {
-            $data = LaporanGudang::where('user_id', $user->id)->latest()->get();
+            $data = LaporanGudang::with('items')->where('user_id', $user->id)->latest()->get();
         } else {
-            $data = LaporanGudang::with('user')->latest()->get();
+            $data = LaporanGudang::with(['user', 'items'])->latest()->get();
         }
 
         return response()->json(['data' => $data]);
@@ -24,7 +25,7 @@ class LaporanGudangController extends Controller
 
     public function show($id)
     {
-        $laporan = LaporanGudang::findOrFail($id);
+        $laporan = LaporanGudang::with('items')->findOrFail($id);
 
         return response()->json([
             'data'     => $laporan,
@@ -40,30 +41,38 @@ class LaporanGudangController extends Controller
         }
 
         $validated = $request->validate([
-            'tanggal_mulai'      => 'required|date',
-            'tanggal_selesai'    => 'required|date|after_or_equal:tanggal_mulai',
-            'stok_awal'          => 'required|integer|min:0',
-            'stok_masuk'         => 'required|integer|min:0',
-            'jumlah_daging_jual' => 'required|integer|min:0',
-            'stok_akhir'         => 'nullable|integer|min:0',
-            'catatan'            => 'nullable|string',
-            'foto'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'tanggal'                  => 'required|date',
+            'tempat_pendistribusian'   => 'required|in:Bogor,Depok',
+            'catatan'                  => 'nullable|string',
+            'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'items'                    => 'required|array|min:1',
+            'items.*.jenis'            => 'required|string|max:50',
+            'items.*.bobot'            => 'required|numeric|min:0.5|max:1.2',
+            'items.*.jumlah'           => 'required|integer|min:1',
         ]);
 
-        $validated['user_id'] = $request->user()->id;
-
-        // Auto-hitung stok_akhir jika tidak diisi
-        if (empty($validated['stok_akhir'])) {
-            $validated['stok_akhir'] = $validated['stok_awal']
-                + $validated['stok_masuk']
-                - $validated['jumlah_daging_jual'];
-        }
-
+        $fotoPath = null;
         if ($request->hasFile('foto')) {
-            $validated['foto'] = $request->file('foto')->store('laporan_gudang', 'public');
+            $fotoPath = $request->file('foto')->store('laporan_gudang', 'public');
         }
 
-        $laporan = LaporanGudang::create($validated);
+        $laporan = DB::transaction(function () use ($validated, $request, $fotoPath) {
+            $laporan = LaporanGudang::create([
+                'user_id'                => $request->user()->id,
+                'tanggal'                => $validated['tanggal'],
+                'tempat_pendistribusian' => $validated['tempat_pendistribusian'],
+                'catatan'                => $validated['catatan'] ?? null,
+                'foto'                   => $fotoPath,
+            ]);
+
+            foreach ($validated['items'] as $item) {
+                $laporan->items()->create($item);
+            }
+
+            return $laporan;
+        });
+
+        $laporan->load('items');
 
         return response()->json([
             'message'  => 'Laporan gudang berhasil dibuat',
@@ -81,24 +90,15 @@ class LaporanGudangController extends Controller
         }
 
         $validated = $request->validate([
-            'tanggal_mulai'      => 'sometimes|required|date',
-            'tanggal_selesai'    => 'sometimes|required|date|after_or_equal:tanggal_mulai',
-            'stok_awal'          => 'sometimes|required|integer|min:0',
-            'stok_masuk'         => 'sometimes|required|integer|min:0',
-            'jumlah_daging_jual' => 'sometimes|required|integer|min:0',
-            'stok_akhir'         => 'nullable|integer|min:0',
-            'catatan'            => 'nullable|string',
-            'foto'               => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'tanggal'                  => 'sometimes|required|date',
+            'tempat_pendistribusian'   => 'sometimes|required|in:Bogor,Depok',
+            'catatan'                  => 'nullable|string',
+            'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'items'                    => 'sometimes|required|array|min:1',
+            'items.*.jenis'            => 'required_with:items|string|max:50',
+            'items.*.bobot'            => 'required_with:items|numeric|min:0.5|max:1.2',
+            'items.*.jumlah'           => 'required_with:items|integer|min:1',
         ]);
-
-        // Recalculate stok_akhir jika field terkait berubah
-        $stokAwal  = $validated['stok_awal']          ?? $laporan->stok_awal;
-        $stokMasuk = $validated['stok_masuk']         ?? $laporan->stok_masuk;
-        $terjual   = $validated['jumlah_daging_jual'] ?? $laporan->jumlah_daging_jual;
-
-        if (!isset($validated['stok_akhir'])) {
-            $validated['stok_akhir'] = $stokAwal + $stokMasuk - $terjual;
-        }
 
         if ($request->hasFile('foto')) {
             if ($laporan->foto) {
@@ -107,7 +107,18 @@ class LaporanGudangController extends Controller
             $validated['foto'] = $request->file('foto')->store('laporan_gudang', 'public');
         }
 
-        $laporan->update($validated);
+        DB::transaction(function () use ($laporan, $validated) {
+            $laporan->update(collect($validated)->except('items')->toArray());
+
+            if (isset($validated['items'])) {
+                $laporan->items()->delete();
+                foreach ($validated['items'] as $item) {
+                    $laporan->items()->create($item);
+                }
+            }
+        });
+
+        $laporan->load('items');
 
         return response()->json([
             'message'  => 'Laporan gudang berhasil diupdate',
@@ -128,7 +139,7 @@ class LaporanGudangController extends Controller
             Storage::disk('public')->delete($laporan->foto);
         }
 
-        $laporan->delete();
+        $laporan->delete(); // items ikut kehapus otomatis karena ON DELETE CASCADE
 
         return response()->json(['message' => 'Laporan gudang berhasil dihapus']);
     }

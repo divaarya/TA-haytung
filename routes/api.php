@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\StokController;
 use App\Http\Controllers\Api\KaryawanController;
+use App\Http\Controllers\Api\SiklusKandangController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -40,8 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Admin'
             ]);
         });
-	Route::post('/users', [AuthController::class, 'register']);
-	Route::delete('/users/{id}', fn($id) => \App\Models\User::destroy($id));
+        Route::post('/users', [AuthController::class, 'register']);
+        Route::delete('/users/{id}', fn($id) => \App\Models\User::destroy($id));
     });
 
     Route::middleware('role:gudang')->group(function () {
@@ -93,8 +94,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/permintaan/{id}/status', [PermintaanController::class, 'updateStatus']);
     });
 
-    
-    // EVENT 
+
+    // EVENT
 Route::get('/event', [EventController::class, 'index']);
 Route::get('/event/{id}', [EventController::class, 'show']);
 
@@ -125,6 +126,11 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/laporan-kandang/{id}', [LaporanKandangController::class, 'show']);
     Route::put('/laporan-kandang/{id}', [LaporanKandangController::class, 'update']);
     Route::delete('/laporan-kandang/{id}', [LaporanKandangController::class, 'destroy']);
+
+    // SIKLUS KANDANG
+    Route::get('/siklus-kandang/aktif', [SiklusKandangController::class, 'aktif']);
+    Route::post('/siklus-kandang', [SiklusKandangController::class, 'store']);
+    Route::post('/siklus-kandang/{id}/panen', [SiklusKandangController::class, 'tandaiPanen']);
 
     Route::get('/laporan-gudang', [LaporanGudangController::class, 'index']);
     Route::post('/laporan-gudang', [LaporanGudangController::class, 'store']);
