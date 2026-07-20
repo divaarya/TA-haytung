@@ -18,17 +18,17 @@ class KaryawanController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nama_lengkap'=>'required',
-            'nama_panggilan'=>'required',
-            'tempat_lahir'=>'required',
-            'tanggal_lahir'=>'required|date',
-            'jenis_kelamin'=>'required|in:L,P',
-            'tanggal_bergabung'=>'required|date',
-            'role'=>'required|in:gudang,kandang,reseller',
-            'status'=>'required|in:aktif,cuti',
-            'nama_usaha'=>'nullable',
-            'alamat_usaha'=>'nullable',
-            'jenis_usaha'=>'nullable'
+            'nama_lengkap' => 'required|string|max:255',
+            'nama_panggilan' => 'required|string|max:100',
+            'tempat_lahir' => 'required|string|max:100',
+            'tanggal_lahir' => 'required|date',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_bergabung' => 'required|date',
+            'role' => 'required|in:gudang,kandang,reseller',
+            'status' => 'required|in:aktif,cuti',
+            'nama_usaha' => 'nullable|string|max:255',
+            'alamat_usaha' => 'nullable|string',
+            'jenis_usaha' => 'nullable|string|max:255',
         ]);
 
         $karyawan = Karyawan::create($data);
@@ -54,14 +54,14 @@ class KaryawanController extends Controller
             'nama_lengkap'=>'sometimes',
             'nama_panggilan'=>'sometimes',
             'tempat_lahir'=>'sometimes',
-            'tanggal_lahir'=>'date',
-            'jenis_kelamin'=>'in:L,P',
-            'tanggal_bergabung'=>'date',
-            'role'=>'in:gudang,kandang,reseller',
-            'status'=>'in:aktif,cuti',
-            'nama_usaha'=>'nullable',
-            'alamat_usaha'=>'nullable',
-            'jenis_usaha'=>'nullable'
+            'tanggal_lahir' => 'sometimes|date',
+            'jenis_kelamin' => 'sometimes|in:L,P',
+            'tanggal_bergabung' => 'sometimes|date',
+            'role' => 'sometimes|in:gudang,kandang,reseller',
+            'status' => 'sometimes|in:aktif,cuti',
+            'nama_usaha' => 'sometimes|nullable',
+            'alamat_usaha' => 'sometimes|nullable',
+            'jenis_usaha' => 'sometimes|nullable',
         ]);
 
         $karyawan->update($data);
