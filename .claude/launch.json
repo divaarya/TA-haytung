@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "admin-haycrew-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "G:/Esta/RUS_TA/admin-haycrew"],
+      "port": 5173
+    }
+  ]
+}
