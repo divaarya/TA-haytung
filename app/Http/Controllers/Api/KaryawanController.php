@@ -27,26 +27,34 @@ class KaryawanController extends Controller
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required|in:L,P',
             'tanggal_bergabung' => 'required|date',
-            'role' => 'required|in:gudang,kandang,reseller',
+            'role' => 'required|in:gudang,kandang,reseller,admin',
             'status' => 'required|in:aktif,cuti',
             'nama_usaha' => 'nullable|string|max:255',
             'alamat_usaha' => 'nullable|string',
             'jenis_usaha' => 'nullable|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
+            'no_hp' => 'nullable|string|max:20',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $karyawan = DB::transaction(function () use ($data) {
+        $fotoPath = $request->hasFile('foto')
+            ? $request->file('foto')->store('users', 'public')
+            : null;
+
+        $karyawan = DB::transaction(function () use ($data, $fotoPath) {
             $user = User::create([
                 'name' => $data['nama_lengkap'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
                 'role' => $data['role'],
                 'status' => $data['status'],
+                'no_hp' => $data['no_hp'] ?? null,
+                'foto' => $fotoPath,
             ]);
 
             $karyawanData = $data;
-            unset($karyawanData['email'], $karyawanData['password']);
+            unset($karyawanData['email'], $karyawanData['password'], $karyawanData['no_hp'], $karyawanData['foto']);
             $karyawanData['user_id'] = $user->id;
 
             return Karyawan::create($karyawanData);
@@ -76,18 +84,24 @@ class KaryawanController extends Controller
             'tanggal_lahir' => 'sometimes|date',
             'jenis_kelamin' => 'sometimes|in:L,P',
             'tanggal_bergabung' => 'sometimes|date',
-            'role' => 'sometimes|in:gudang,kandang,reseller',
+            'role' => 'sometimes|in:gudang,kandang,reseller,admin',
             'status' => 'sometimes|in:aktif,cuti',
             'nama_usaha' => 'sometimes|nullable|string|max:255',
             'alamat_usaha' => 'sometimes|nullable|string',
             'jenis_usaha' => 'sometimes|nullable|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . optional($karyawan->user)->id,
             'password' => 'sometimes|nullable|string|min:6',
+            'no_hp' => 'sometimes|nullable|string|max:20',
+            'foto' => 'sometimes|nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        DB::transaction(function () use ($karyawan, $data) {
+        $fotoPath = $request->hasFile('foto')
+            ? $request->file('foto')->store('users', 'public')
+            : null;
+
+        DB::transaction(function () use ($karyawan, $data, $fotoPath) {
             $karyawanData = $data;
-            unset($karyawanData['email'], $karyawanData['password']);
+            unset($karyawanData['email'], $karyawanData['password'], $karyawanData['no_hp'], $karyawanData['foto']);
             $karyawan->update($karyawanData);
 
             if ($karyawan->user) {
@@ -96,7 +110,9 @@ class KaryawanController extends Controller
                 if (isset($data['email'])) $userData['email'] = $data['email'];
                 if (isset($data['role'])) $userData['role'] = $data['role'];
                 if (isset($data['status'])) $userData['status'] = $data['status'];
+                if (array_key_exists('no_hp', $data)) $userData['no_hp'] = $data['no_hp'];
                 if (!empty($data['password'])) $userData['password'] = Hash::make($data['password']);
+                if ($fotoPath) $userData['foto'] = $fotoPath;
 
                 if (!empty($userData)) {
                     $karyawan->user->update($userData);
