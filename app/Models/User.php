@@ -44,4 +44,9 @@ public function events()
 {
     return $this->hasMany(Event::class);
 }
+
+public function karyawan()
+{
+    return $this->hasOne(Karyawan::class);
+}
 }
