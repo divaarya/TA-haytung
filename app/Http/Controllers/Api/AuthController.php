@@ -97,4 +97,27 @@ class AuthController extends Controller
             'foto_url' => $user->foto ? asset('storage/' . $user->foto) : null
         ]);
     }
+
+    // CHANGE PASSWORD
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return response()->json([
+                'message' => 'Password saat ini salah'
+            ], 422);
+        }
+
+        $user->update(['password' => Hash::make($validated['password'])]);
+
+        return response()->json([
+            'message' => 'Password berhasil diubah'
+        ]);
+    }
 }
