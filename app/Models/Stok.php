@@ -22,4 +22,21 @@ class Stok extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function pesanans()
+    {
+        return $this->hasMany(Pesanan::class);
+    }
+
+    /**
+     * Tentuin status stok berdasarkan jumlah. Ambang batas ini masih tebakan —
+     * sesuaikan angkanya sama kebutuhan bisnis kamu. Dipakai bareng oleh
+     * LaporanGudangController & PesananController biar aturannya satu tempat.
+     */
+    public static function tentukanStatus(int $jumlah): string
+    {
+        if ($jumlah <= 0) return 'habis';
+        if ($jumlah < 20) return 'menipis';
+        return 'aman';
+    }
 }

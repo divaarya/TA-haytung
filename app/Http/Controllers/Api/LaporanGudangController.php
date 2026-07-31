@@ -85,47 +85,41 @@ class LaporanGudangController extends Controller
 
     /**
      * Tambahin/update stok di tabel `stoks` berdasarkan item laporan gudang.
-     * Dicocokkan berdasarkan `jenis` (case-insensitive). Kalau belum ada,
-     * bikin baris baru; kalau sudah ada, jumlah_stok & estimasi_total_berat
-     * diakumulasi.
+     * Dicocokkan berdasarkan `jenis` DAN `berat_per_item` (dibulatkan 2
+     * desimal) — jenis sama tapi berat beda (misal Whole 1,5 kg vs Whole
+     * 1,0 kg) dianggap baris stok yang BEDA, bukan digabung/di-average jadi
+     * satu. Kalau belum ada baris yang cocok persis, bikin baris baru; kalau
+     * sudah ada, jumlah_stok & estimasi_total_berat diakumulasi.
      */
     private function tambahStok(array $item, int $userId): void
     {
-        $existing = Stok::whereRaw('LOWER(jenis) = ?', [strtolower($item['jenis'])])->first();
+        $bobot = $item['bobot'];
+
+        $existing = Stok::whereRaw('LOWER(jenis) = ?', [strtolower($item['jenis'])])
+            ->whereRaw('ROUND(berat_per_item, 2) = ROUND(?, 2)', [$bobot])
+            ->first();
 
         if ($existing) {
             $jumlahBaru = $existing->jumlah_stok + $item['jumlah'];
-            $totalBeratBaru = $existing->estimasi_total_berat + ($item['bobot'] * $item['jumlah']);
+            $totalBeratBaru = $existing->estimasi_total_berat + ($bobot * $item['jumlah']);
 
             $existing->update([
                 'jumlah_stok'          => $jumlahBaru,
                 'estimasi_total_berat' => $totalBeratBaru,
-                'berat_per_item'       => $jumlahBaru > 0 ? round($totalBeratBaru / $jumlahBaru, 2) : 0,
                 'tanggal_update'       => now()->toDateString(),
-                'status'               => $this->tentukanStatusStok($jumlahBaru),
+                'status'               => Stok::tentukanStatus($jumlahBaru),
             ]);
         } else {
             Stok::create([
                 'user_id'              => $userId,
                 'jenis'                => $item['jenis'],
-                'berat_per_item'       => $item['bobot'],
+                'berat_per_item'       => $bobot,
                 'jumlah_stok'          => $item['jumlah'],
-                'estimasi_total_berat' => $item['bobot'] * $item['jumlah'],
+                'estimasi_total_berat' => $bobot * $item['jumlah'],
                 'tanggal_update'       => now()->toDateString(),
-                'status'               => $this->tentukanStatusStok($item['jumlah']),
+                'status'               => Stok::tentukanStatus($item['jumlah']),
             ]);
         }
-    }
-
-    /**
-     * Tentuin status stok berdasarkan jumlah. Ambang batas ini masih tebakan —
-     * sesuaikan angkanya sama kebutuhan bisnis kamu.
-     */
-    private function tentukanStatusStok(int $jumlah): string
-    {
-        if ($jumlah <= 0) return 'habis';
-        if ($jumlah < 20) return 'menipis';
-        return 'aman';
     }
 
     public function update(Request $request, $id)

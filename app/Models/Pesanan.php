@@ -14,5 +14,12 @@ class Pesanan extends Model
         'kuantitas',
         'total',
         'alamat_pengiriman',
+        'stok_id',
+        'jenis',
     ];
+
+    public function stok()
+    {
+        return $this->belongsTo(Stok::class);
+    }
 }
