@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\StokController;
 use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\Api\SiklusKandangController;
 use App\Http\Controllers\Api\PesananController;
+use App\Http\Controllers\Api\GudangController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -146,6 +147,12 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/stok/{id}', [StokController::class, 'show']);
     Route::put('/stok/{id}', [StokController::class, 'update']);
     Route::delete('/stok/{id}', [StokController::class, 'destroy']);
+
+    // GUDANG (daftar lokasi/tempat pendistribusian yang admin bisa kelola)
+    Route::get('/gudang', [GudangController::class, 'index']);
+    Route::middleware('role:admin')->group(function () {
+        Route::post('/gudang', [GudangController::class, 'store']);
+    });
 
     //PESANAN
     Route::get('/pesanan', [PesananController::class, 'index']);

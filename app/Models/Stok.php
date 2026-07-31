@@ -11,6 +11,7 @@ class Stok extends Model
     protected $fillable = [
         'user_id',
         'jenis',
+        'gudang',
         'berat_per_item',
         'jumlah_stok',
         'estimasi_total_berat',

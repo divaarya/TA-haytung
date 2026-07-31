@@ -36,6 +36,7 @@ class StokController extends Controller
 
         $validated = $request->validate([
             'jenis'                 => 'required|in:whole,parting',
+            'gudang'                => 'required|exists:gudangs,nama',
             'berat_per_item'        => 'required|numeric|min:0',
             'jumlah_stok'           => 'required|integer|min:0',
             'estimasi_total_berat'  => 'required|numeric|min:0',
@@ -63,6 +64,7 @@ class StokController extends Controller
 
         $validated = $request->validate([
             'jenis'                 => 'sometimes|required|in:whole,parting',
+            'gudang'                => 'sometimes|required|exists:gudangs,nama',
             'berat_per_item'        => 'sometimes|required|numeric|min:0',
             'jumlah_stok'           => 'sometimes|required|integer|min:0',
             'estimasi_total_berat'  => 'sometimes|required|numeric|min:0',

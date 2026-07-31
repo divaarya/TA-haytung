@@ -43,7 +43,7 @@ class LaporanGudangController extends Controller
 
         $validated = $request->validate([
             'tanggal'                  => 'required|date',
-            'tempat_pendistribusian'   => 'required|in:Bogor,Depok',
+            'tempat_pendistribusian'   => 'required|exists:gudangs,nama',
             'catatan'                  => 'nullable|string',
             'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'items'                    => 'required|array|min:1',
@@ -68,7 +68,7 @@ class LaporanGudangController extends Controller
 
             foreach ($validated['items'] as $item) {
                 $laporan->items()->create($item);
-                $this->tambahStok($item, $request->user()->id);
+                $this->tambahStok($item, $request->user()->id, $validated['tempat_pendistribusian']);
             }
 
             return $laporan;
@@ -85,18 +85,20 @@ class LaporanGudangController extends Controller
 
     /**
      * Tambahin/update stok di tabel `stoks` berdasarkan item laporan gudang.
-     * Dicocokkan berdasarkan `jenis` DAN `berat_per_item` (dibulatkan 2
-     * desimal) — jenis sama tapi berat beda (misal Whole 1,5 kg vs Whole
-     * 1,0 kg) dianggap baris stok yang BEDA, bukan digabung/di-average jadi
-     * satu. Kalau belum ada baris yang cocok persis, bikin baris baru; kalau
-     * sudah ada, jumlah_stok & estimasi_total_berat diakumulasi.
+     * Dicocokkan berdasarkan `jenis`, `berat_per_item` (dibulatkan 2 desimal)
+     * DAN `gudang` — jenis & berat yang sama tapi gudang beda (misal Whole
+     * 1,5 kg di Bogor vs Whole 1,5 kg di Depok) dianggap baris stok yang
+     * BEDA, karena fisiknya memang disimpan di lokasi yang beda. Kalau belum
+     * ada baris yang cocok persis, bikin baris baru; kalau sudah ada,
+     * jumlah_stok & estimasi_total_berat diakumulasi.
      */
-    private function tambahStok(array $item, int $userId): void
+    private function tambahStok(array $item, int $userId, string $gudang): void
     {
         $bobot = $item['bobot'];
 
         $existing = Stok::whereRaw('LOWER(jenis) = ?', [strtolower($item['jenis'])])
             ->whereRaw('ROUND(berat_per_item, 2) = ROUND(?, 2)', [$bobot])
+            ->where('gudang', $gudang)
             ->first();
 
         if ($existing) {
@@ -113,6 +115,7 @@ class LaporanGudangController extends Controller
             Stok::create([
                 'user_id'              => $userId,
                 'jenis'                => $item['jenis'],
+                'gudang'               => $gudang,
                 'berat_per_item'       => $bobot,
                 'jumlah_stok'          => $item['jumlah'],
                 'estimasi_total_berat' => $bobot * $item['jumlah'],
@@ -132,7 +135,7 @@ class LaporanGudangController extends Controller
 
         $validated = $request->validate([
             'tanggal'                  => 'sometimes|required|date',
-            'tempat_pendistribusian'   => 'sometimes|required|in:Bogor,Depok',
+            'tempat_pendistribusian'   => 'sometimes|required|exists:gudangs,nama',
             'catatan'                  => 'nullable|string',
             'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'items'                    => 'sometimes|required|array|min:1',

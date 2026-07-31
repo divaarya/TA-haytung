@@ -44,7 +44,7 @@ class PermintaanController extends Controller
             'jumlah' => 'nullable|integer',
             'harga' => 'nullable|numeric',
             'tanggal' => 'required|date',
-            'tempat_pendistribusian' => 'nullable|in:Bogor,Depok',
+            'tempat_pendistribusian' => 'nullable|exists:gudangs,nama',
             'catatan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -100,7 +100,7 @@ class PermintaanController extends Controller
             'jumlah' => 'nullable|integer',
             'harga' => 'nullable|numeric',
             'tanggal' => 'sometimes|required|date',
-            'tempat_pendistribusian' => 'nullable|in:Bogor,Depok',
+            'tempat_pendistribusian' => 'nullable|exists:gudangs,nama',
             'catatan' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
