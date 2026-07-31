@@ -43,7 +43,7 @@ class LaporanGudangController extends Controller
 
         $validated = $request->validate([
             'tanggal'                  => 'required|date',
-            'tempat_pendistribusian'   => 'required|in:Gudang Bogor,Gudang Depok',
+            'tempat_pendistribusian'   => 'required|in:Bogor,Depok',
             'catatan'                  => 'nullable|string',
             'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'items'                    => 'required|array|min:1',
@@ -138,7 +138,7 @@ class LaporanGudangController extends Controller
 
         $validated = $request->validate([
             'tanggal'                  => 'sometimes|required|date',
-            'tempat_pendistribusian'   => 'sometimes|required|in:Gudang Bogor,Gudang Depok',
+            'tempat_pendistribusian'   => 'sometimes|required|in:Bogor,Depok',
             'catatan'                  => 'nullable|string',
             'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'items'                    => 'sometimes|required|array|min:1',
