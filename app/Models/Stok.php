@@ -23,20 +23,23 @@ class Stok extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function pesanans()
+    public function pesananItems()
     {
-        return $this->hasMany(Pesanan::class);
+        return $this->hasMany(PesananItem::class);
     }
 
     /**
-     * Tentuin status stok berdasarkan jumlah. Ambang batas ini masih tebakan —
-     * sesuaikan angkanya sama kebutuhan bisnis kamu. Dipakai bareng oleh
-     * LaporanGudangController & PesananController biar aturannya satu tempat.
+     * Tentuin status stok berdasarkan jumlah. Range 50-500 dianggap "aman";
+     * di bawah 50 kekurangan stok ("tidak aman"), di atas 500 kebanyakan
+     * stok ("waspada" — risiko basi/kapasitas gudang buat produk daging).
+     * Ambang batas ini masih perkiraan awal, sesuaikan sama kebutuhan bisnis
+     * kamu. Dipakai bareng oleh LaporanGudangController & PesananController
+     * biar aturannya satu tempat.
      */
     public static function tentukanStatus(int $jumlah): string
     {
-        if ($jumlah <= 0) return 'habis';
-        if ($jumlah < 20) return 'menipis';
+        if ($jumlah < 50) return 'tidak aman';
+        if ($jumlah > 500) return 'waspada';
         return 'aman';
     }
 }

@@ -13,7 +13,7 @@ class PesananController extends Controller
 {
     public function index()
     {
-        return response()->json(Pesanan::with('stok')->latest()->get());
+        return response()->json(Pesanan::with('items')->latest()->get());
     }
 
     public function store(Request $request)
@@ -21,36 +21,31 @@ class PesananController extends Controller
         $validated = $request->validate([
             'nama_pemesan' => 'required|string|max:255',
             'no_hp' => 'required|string|max:20',
-            'stok_id' => 'required|exists:stoks,id',
             'keterangan' => 'nullable|string',
-            'kuantitas' => 'required|integer|min:1',
             'total' => 'required|numeric|min:0',
             'alamat_pengiriman' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.stok_id' => 'required|exists:stoks,id',
+            'items.*.kuantitas' => 'required|integer|min:1',
         ]);
 
         $pesanan = DB::transaction(function () use ($validated) {
-            $stok = Stok::lockForUpdate()->findOrFail($validated['stok_id']);
-
-            if ($stok->jumlah_stok < $validated['kuantitas']) {
-                throw ValidationException::withMessages([
-                    'kuantitas' => "Stok {$stok->jenis} cuma tersisa {$stok->jumlah_stok} pcs.",
-                ]);
-            }
-
-            $this->sesuaikanStok($stok, -$validated['kuantitas']);
-
-            return Pesanan::create([
+            $pesanan = Pesanan::create([
                 'nama_pemesan'      => $validated['nama_pemesan'],
                 'no_hp'             => $validated['no_hp'],
-                'stok_id'           => $stok->id,
-                'jenis'             => $stok->jenis,
-                'bobot'             => $stok->berat_per_item,
                 'keterangan'        => $validated['keterangan'] ?? null,
-                'kuantitas'         => $validated['kuantitas'],
                 'total'             => $validated['total'],
                 'alamat_pengiriman' => $validated['alamat_pengiriman'],
             ]);
+
+            foreach ($validated['items'] as $item) {
+                $this->potongStokUntukItem($pesanan, $item);
+            }
+
+            return $pesanan;
         });
+
+        $pesanan->load('items');
 
         return response()->json([
             'message' => 'Data berhasil ditambah',
@@ -61,57 +56,52 @@ class PesananController extends Controller
     public function show($id)
     {
         return response()->json(
-            Pesanan::with('stok')->findOrFail($id)
+            Pesanan::with('items')->findOrFail($id)
         );
     }
 
     public function update(Request $request, $id)
     {
-        $pesanan = Pesanan::findOrFail($id);
+        $pesanan = Pesanan::with('items')->findOrFail($id);
 
         $validated = $request->validate([
             'nama_pemesan' => 'required|string|max:255',
             'no_hp' => 'required|string|max:20',
-            'stok_id' => 'required|exists:stoks,id',
             'keterangan' => 'nullable|string',
-            'kuantitas' => 'required|integer|min:1',
             'total' => 'required|numeric|min:0',
             'alamat_pengiriman' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.stok_id' => 'required|exists:stoks,id',
+            'items.*.kuantitas' => 'required|integer|min:1',
         ]);
 
         DB::transaction(function () use ($pesanan, $validated) {
-            // Kembaliin dulu alokasi lama (kalau pesanan ini sebelumnya sudah
-            // kepotong dari stok tertentu), baru potong alokasi baru — biar
-            // ganti kuantitas atau ganti item stok tetap konsisten angkanya.
-            if ($pesanan->stok_id) {
-                $stokLama = Stok::lockForUpdate()->find($pesanan->stok_id);
-                if ($stokLama) {
-                    $this->sesuaikanStok($stokLama, $pesanan->kuantitas);
+            // Kembalikan dulu semua alokasi lama sebelum motong yang baru,
+            // biar ganti kuantitas/item tetap konsisten angka stoknya.
+            foreach ($pesanan->items as $oldItem) {
+                if ($oldItem->stok_id) {
+                    $stokLama = Stok::lockForUpdate()->find($oldItem->stok_id);
+                    if ($stokLama) {
+                        $this->sesuaikanStok($stokLama, $oldItem->kuantitas);
+                    }
                 }
             }
+            $pesanan->items()->delete();
 
-            $stokBaru = Stok::lockForUpdate()->findOrFail($validated['stok_id']);
-
-            if ($stokBaru->jumlah_stok < $validated['kuantitas']) {
-                throw ValidationException::withMessages([
-                    'kuantitas' => "Stok {$stokBaru->jenis} cuma tersisa {$stokBaru->jumlah_stok} pcs.",
-                ]);
+            foreach ($validated['items'] as $item) {
+                $this->potongStokUntukItem($pesanan, $item);
             }
-
-            $this->sesuaikanStok($stokBaru, -$validated['kuantitas']);
 
             $pesanan->update([
                 'nama_pemesan'      => $validated['nama_pemesan'],
                 'no_hp'             => $validated['no_hp'],
-                'stok_id'           => $stokBaru->id,
-                'jenis'             => $stokBaru->jenis,
-                'bobot'             => $stokBaru->berat_per_item,
                 'keterangan'        => $validated['keterangan'] ?? null,
-                'kuantitas'         => $validated['kuantitas'],
                 'total'             => $validated['total'],
                 'alamat_pengiriman' => $validated['alamat_pengiriman'],
             ]);
         });
+
+        $pesanan->load('items');
 
         return response()->json([
             'message' => 'Data berhasil diupdate',
@@ -122,20 +112,48 @@ class PesananController extends Controller
     public function destroy($id)
     {
         DB::transaction(function () use ($id) {
-            $pesanan = Pesanan::findOrFail($id);
+            $pesanan = Pesanan::with('items')->findOrFail($id);
 
-            if ($pesanan->stok_id) {
-                $stok = Stok::lockForUpdate()->find($pesanan->stok_id);
-                if ($stok) {
-                    $this->sesuaikanStok($stok, $pesanan->kuantitas);
+            foreach ($pesanan->items as $item) {
+                if ($item->stok_id) {
+                    $stok = Stok::lockForUpdate()->find($item->stok_id);
+                    if ($stok) {
+                        $this->sesuaikanStok($stok, $item->kuantitas);
+                    }
                 }
             }
 
-            $pesanan->delete();
+            $pesanan->delete(); // items ikut kehapus otomatis karena ON DELETE CASCADE
         });
 
         return response()->json([
             'message' => 'Data berhasil dihapus'
+        ]);
+    }
+
+    /**
+     * Potong stok buat satu baris item pesanan (dipakai bareng oleh store &
+     * update). Ngunci baris stok-nya dulu (lockForUpdate) biar aman kalau
+     * ada 2 pesanan masuk stok yang sama secara bersamaan, lalu tolak kalau
+     * jumlahnya nggak cukup.
+     */
+    private function potongStokUntukItem(Pesanan $pesanan, array $item): void
+    {
+        $stok = Stok::lockForUpdate()->findOrFail($item['stok_id']);
+
+        if ($stok->jumlah_stok < $item['kuantitas']) {
+            throw ValidationException::withMessages([
+                'items' => "Stok {$stok->jenis} ({$stok->berat_per_item} kg) cuma tersisa {$stok->jumlah_stok} pcs.",
+            ]);
+        }
+
+        $this->sesuaikanStok($stok, -$item['kuantitas']);
+
+        $pesanan->items()->create([
+            'stok_id'   => $stok->id,
+            'jenis'     => $stok->jenis,
+            'bobot'     => $stok->berat_per_item,
+            'kuantitas' => $item['kuantitas'],
         ]);
     }
 

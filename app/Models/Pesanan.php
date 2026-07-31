@@ -9,17 +9,13 @@ class Pesanan extends Model
     protected $fillable = [
         'nama_pemesan',
         'no_hp',
-        'bobot',
         'keterangan',
-        'kuantitas',
         'total',
         'alamat_pengiriman',
-        'stok_id',
-        'jenis',
     ];
 
-    public function stok()
+    public function items()
     {
-        return $this->belongsTo(Stok::class);
+        return $this->hasMany(PesananItem::class);
     }
 }

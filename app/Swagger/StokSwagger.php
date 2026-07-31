@@ -17,7 +17,7 @@ class StokSwagger
             new OA\Property(property: "jumlah_stok", type: "integer", example: 100),
             new OA\Property(property: "estimasi_total_berat", type: "number", example: 150),
             new OA\Property(property: "tanggal_update", type: "string", format: "date", example: "2026-05-06"),
-            new OA\Property(property: "status", type: "string", enum: ["aman","menipis","habis"], example: "aman"),
+            new OA\Property(property: "status", type: "string", enum: ["aman","waspada","tidak aman"], example: "aman"),
         ]
     )]
 
@@ -37,7 +37,7 @@ class StokSwagger
             new OA\Property(property: "jumlah_stok", type: "integer", example: 100),
             new OA\Property(property: "estimasi_total_berat", type: "number", example: 150),
             new OA\Property(property: "tanggal_update", type: "string", format: "date", example: "2026-05-06"),
-            new OA\Property(property: "status", type: "string", enum: ["aman","menipis","habis"], example: "aman"),
+            new OA\Property(property: "status", type: "string", enum: ["aman","waspada","tidak aman"], example: "aman"),
         ]
     )]
 

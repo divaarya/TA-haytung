@@ -40,7 +40,7 @@ class StokController extends Controller
             'jumlah_stok'           => 'required|integer|min:0',
             'estimasi_total_berat'  => 'required|numeric|min:0',
             'tanggal_update'        => 'required|date',
-            'status'                => 'required|in:aman,menipis,habis',
+            'status'                => 'required|in:aman,waspada,tidak aman',
         ]);
 
         $validated['user_id'] = $request->user()->id;
@@ -67,7 +67,7 @@ class StokController extends Controller
             'jumlah_stok'           => 'sometimes|required|integer|min:0',
             'estimasi_total_berat'  => 'sometimes|required|numeric|min:0',
             'tanggal_update'        => 'sometimes|required|date',
-            'status'                => 'sometimes|required|in:aman,menipis,habis',
+            'status'                => 'sometimes|required|in:aman,waspada,tidak aman',
         ]);
 
         // Auto-update tanggal_update ke hari ini jika tidak diisi
