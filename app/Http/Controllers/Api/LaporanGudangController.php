@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\LaporanGudang;
+use App\Models\Stok;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -47,7 +48,7 @@ class LaporanGudangController extends Controller
             'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'items'                    => 'required|array|min:1',
             'items.*.jenis'            => 'required|string|max:50',
-            'items.*.bobot'            => 'required|numeric|min:0.5|max:1.2',
+            'items.*.bobot'            => 'required|numeric|min:0.01',
             'items.*.jumlah'           => 'required|integer|min:1',
         ]);
 
@@ -67,6 +68,7 @@ class LaporanGudangController extends Controller
 
             foreach ($validated['items'] as $item) {
                 $laporan->items()->create($item);
+                $this->tambahStok($item, $request->user()->id);
             }
 
             return $laporan;
@@ -79,6 +81,51 @@ class LaporanGudangController extends Controller
             'data'     => $laporan,
             'foto_url' => $laporan->foto ? asset('storage/' . $laporan->foto) : null,
         ], 201);
+    }
+
+    /**
+     * Tambahin/update stok di tabel `stoks` berdasarkan item laporan gudang.
+     * Dicocokkan berdasarkan `jenis` (case-insensitive). Kalau belum ada,
+     * bikin baris baru; kalau sudah ada, jumlah_stok & estimasi_total_berat
+     * diakumulasi.
+     */
+    private function tambahStok(array $item, int $userId): void
+    {
+        $existing = Stok::whereRaw('LOWER(jenis) = ?', [strtolower($item['jenis'])])->first();
+
+        if ($existing) {
+            $jumlahBaru = $existing->jumlah_stok + $item['jumlah'];
+            $totalBeratBaru = $existing->estimasi_total_berat + ($item['bobot'] * $item['jumlah']);
+
+            $existing->update([
+                'jumlah_stok'          => $jumlahBaru,
+                'estimasi_total_berat' => $totalBeratBaru,
+                'berat_per_item'       => $jumlahBaru > 0 ? round($totalBeratBaru / $jumlahBaru, 2) : 0,
+                'tanggal_update'       => now()->toDateString(),
+                'status'               => $this->tentukanStatusStok($jumlahBaru),
+            ]);
+        } else {
+            Stok::create([
+                'user_id'              => $userId,
+                'jenis'                => $item['jenis'],
+                'berat_per_item'       => $item['bobot'],
+                'jumlah_stok'          => $item['jumlah'],
+                'estimasi_total_berat' => $item['bobot'] * $item['jumlah'],
+                'tanggal_update'       => now()->toDateString(),
+                'status'               => $this->tentukanStatusStok($item['jumlah']),
+            ]);
+        }
+    }
+
+    /**
+     * Tentuin status stok berdasarkan jumlah. Ambang batas ini masih tebakan —
+     * sesuaikan angkanya sama kebutuhan bisnis kamu.
+     */
+    private function tentukanStatusStok(int $jumlah): string
+    {
+        if ($jumlah <= 0) return 'habis';
+        if ($jumlah < 20) return 'menipis';
+        return 'aman';
     }
 
     public function update(Request $request, $id)
@@ -96,7 +143,7 @@ class LaporanGudangController extends Controller
             'foto'                     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'items'                    => 'sometimes|required|array|min:1',
             'items.*.jenis'            => 'required_with:items|string|max:50',
-            'items.*.bobot'            => 'required_with:items|numeric|min:0.5|max:1.2',
+            'items.*.bobot'            => 'required_with:items|numeric|min:0.01',
             'items.*.jumlah'           => 'required_with:items|integer|min:1',
         ]);
 

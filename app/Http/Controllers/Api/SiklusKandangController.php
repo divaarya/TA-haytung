@@ -75,7 +75,7 @@ class SiklusKandangController extends Controller
 
         if ($umurHari < 70) {
             $request->validate([
-                'catatan_panen_dini' => 'required|string|min:10',
+                'catatan_panen_dini' => 'required|string',
             ], [
                 'catatan_panen_dini.required' => 'Umur ayam belum 70 hari, wajib isi alasan panen dini.',
             ]);
