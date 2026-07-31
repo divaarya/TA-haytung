@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Permintaan;
+use Illuminate\Support\Facades\Storage;
 
 class PermintaanController extends Controller
 {
@@ -37,13 +38,21 @@ class PermintaanController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama_permintaan' => 'required',
             'tipe' => 'required|in:barang,dana',
             'jumlah' => 'nullable|integer',
             'harga' => 'nullable|numeric',
-            'tanggal' => 'required|date'
+            'tanggal' => 'required|date',
+            'tempat_pendistribusian' => 'nullable|in:Gudang Bogor,Gudang Depok',
+            'catatan' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('permintaan', 'public');
+        }
 
         $data = Permintaan::create([
             'user_id' => $request->user()->id,
@@ -52,12 +61,16 @@ class PermintaanController extends Controller
             'jumlah' => $request->jumlah,
             'harga' => $request->harga,
             'tanggal' => $request->tanggal,
+            'tempat_pendistribusian' => $validated['tempat_pendistribusian'] ?? null,
+            'catatan' => $validated['catatan'] ?? null,
+            'foto' => $fotoPath,
             'status' => 'pending'
         ]);
 
         return response()->json([
             'message' => 'Permintaan berhasil dibuat',
-            'data' => $data
+            'data' => $data,
+            'foto_url' => $fotoPath ? asset('storage/' . $fotoPath) : null,
         ]);
     }
 
@@ -86,14 +99,25 @@ class PermintaanController extends Controller
             'tipe' => 'sometimes|required|in:barang,dana',
             'jumlah' => 'nullable|integer',
             'harga' => 'nullable|numeric',
-            'tanggal' => 'sometimes|required|date'
+            'tanggal' => 'sometimes|required|date',
+            'tempat_pendistribusian' => 'nullable|in:Gudang Bogor,Gudang Depok',
+            'catatan' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('foto')) {
+            if ($permintaan->foto) {
+                Storage::disk('public')->delete($permintaan->foto);
+            }
+            $validated['foto'] = $request->file('foto')->store('permintaan', 'public');
+        }
 
         $permintaan->update($validated);
 
         return response()->json([
             'message' => 'Permintaan berhasil diupdate',
-            'data' => $permintaan
+            'data' => $permintaan,
+            'foto_url' => $permintaan->foto ? asset('storage/' . $permintaan->foto) : null,
         ]);
     }
 

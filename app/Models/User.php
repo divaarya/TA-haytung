@@ -30,6 +30,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $appends = [
+        'foto_url',
+    ];
+
+    public function getFotoUrlAttribute()
+    {
+        return $this->foto ? asset('storage/' . $this->foto) : null;
+    }
+
     public function laporans()
 {
     return $this->hasMany(Laporan::class);
