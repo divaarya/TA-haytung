@@ -14,7 +14,10 @@ class Permintaan extends Model
         'harga',
         'status',
         'alasan_tolak',
-        'tanggal'
+        'tanggal',
+        'tempat_pendistribusian',
+        'catatan',
+        'foto'
     ];
 
     public function user()
