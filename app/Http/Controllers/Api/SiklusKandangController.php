@@ -11,10 +11,17 @@ class SiklusKandangController extends Controller
 {
     public function aktif(Request $request)
     {
-        $siklus = SiklusKandang::where('user_id', Auth::id())
-            ->where('status', 'berjalan')
-            ->latest('tanggal_mulai')
-            ->first();
+        $query = SiklusKandang::where('status', 'berjalan');
+
+        // Kandang cuma boleh lihat siklus miliknya sendiri. Role lain (admin,
+        // dsb) butuh siklus aktif secara sistem buat nampilin Total Ayam Hidup
+        // di web — kalau ikut di-scope ke Auth::id() punya admin, hasilnya
+        // selalu null karena siklus itu dibuat atas nama user kandang, bukan admin.
+        if ($request->user()->role === 'kandang') {
+            $query->where('user_id', Auth::id());
+        }
+
+        $siklus = $query->latest('tanggal_mulai')->first();
 
         if (!$siklus) {
             return response()->json([
