@@ -11,9 +11,15 @@ use Illuminate\Validation\ValidationException;
 
 class PesananController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Pesanan::with('items')->latest()->get());
+        $query = Pesanan::with('items')->latest();
+
+        if ($request->filled('limit')) {
+            $query->limit((int) $request->query('limit'));
+        }
+
+        return response()->json($query->get());
     }
 
     public function store(Request $request)
