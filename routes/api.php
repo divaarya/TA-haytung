@@ -152,6 +152,7 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/gudang', [GudangController::class, 'index']);
     Route::middleware('role:admin')->group(function () {
         Route::post('/gudang', [GudangController::class, 'store']);
+        Route::delete('/gudang/{gudang}', [GudangController::class, 'destroy']);
     });
 
     //PESANAN
