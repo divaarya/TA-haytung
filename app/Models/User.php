@@ -17,8 +17,8 @@ class User extends Authenticatable
         'password',
         'role',
         'foto',
-	'no_hp',
-	'status'
+        'no_hp',
+        'status'
     ];
 
     protected $hidden = [
@@ -40,22 +40,22 @@ class User extends Authenticatable
     }
 
     public function laporans()
-{
-    return $this->hasMany(Laporan::class);
-}
+    {
+        return $this->hasMany(Laporan::class);
+    }
 
-public function permintaans()
-{
-    return $this->hasMany(Permintaan::class);
-}
+    public function permintaans()
+    {
+        return $this->hasMany(Permintaan::class);
+    }
 
-public function events()
-{
-    return $this->hasMany(Event::class);
-}
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 
-public function karyawan()
-{
-    return $this->hasOne(Karyawan::class);
-}
+    public function karyawan()
+    {
+        return $this->hasOne(Karyawan::class);
+    }
 }

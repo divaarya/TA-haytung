@@ -12,31 +12,31 @@ class AuthController extends Controller
 {
     // REGISTER
     public function register(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users',
-        'password' => 'required|min:6',
-        'role' => 'required|in:admin,kandang,gudang,reseller',
-        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-	'no_hp' => 'nullable|string|max:20',
-	'status' => 'nullable|in:Aktif,Cuti',
-    ]);
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'role' => 'required|in:admin,kandang,gudang,reseller',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'no_hp' => 'nullable|string|max:20',
+            'status' => 'nullable|in:Aktif,Cuti',
+        ]);
 
-    if ($request->hasFile('foto')) {
-        $validated['foto'] = $request->file('foto')->store('users', 'public');
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')->store('users', 'public');
+        }
+
+        $validated['password'] = Hash::make($validated['password']);
+
+        $user = \App\Models\User::create($validated);
+
+        return response()->json([
+            'message' => 'User berhasil dibuat',
+            'data' => $user,
+            'foto_url' => $user->foto ? asset('storage/' . $user->foto) : null
+        ]);
     }
-
-    $validated['password'] = \Hash::make($validated['password']);
-
-    $user = \App\Models\User::create($validated);
-
-    return response()->json([
-        'message' => 'User berhasil dibuat',
-        'data' => $user,
-        'foto_url' => $user->foto ? asset('storage/'.$user->foto) : null
-    ]);
-}
 
     // LOGIN
     public function login(Request $request)
@@ -52,6 +52,7 @@ class AuthController extends Controller
             ], 401);
         }
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $token = $user->createToken('auth_token')->plainTextToken;
