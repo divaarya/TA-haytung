@@ -133,6 +133,7 @@ Route::middleware('role:admin')->group(function () {
 
     // SIKLUS KANDANG
     Route::get('/siklus-kandang/aktif', [SiklusKandangController::class, 'aktif']);
+    Route::get('/siklus-kandang/aktif-semua', [SiklusKandangController::class, 'aktifSemua']);
     Route::post('/siklus-kandang', [SiklusKandangController::class, 'store']);
     Route::post('/siklus-kandang/{id}/panen', [SiklusKandangController::class, 'tandaiPanen']);
 

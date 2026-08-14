@@ -13,23 +13,20 @@ class PermintaanController extends Controller
     {
         $user = $request->user();
 
-	$query = Permintaan::with('user')->orderByDesc('tanggal');
+        $query = Permintaan::with('user')->orderByDesc('tanggal');
 
-        if ($user->role == 'admin') {
-            $data = Permintaan::with('user')->get()->map(function ($item) {
-                $item->role = $item->user->role;
-                return $item;
-            });
-        } else {
-            $data = Permintaan::with('user')
-                ->where('user_id', $user->id)
-                ->get()
-                ->map(function ($item) {
-                    $item->role = $item->user->role;
-                    return $item;
-                });
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
         }
 
+        if ($request->filled('limit')) {
+            $query->limit((int) $request->query('limit'));
+        }
+
+        $data = $query->get()->map(function ($item) {
+            $item->role = $item->user->role;
+            return $item;
+        });
 
         return response()->json([
             'data' => $data

@@ -41,6 +41,20 @@ class SiklusKandangController extends Controller
         ]);
     }
 
+    // Dipakai website buat hitung Total Ayam Hidup di seluruh kandang —
+    // beda dari aktif() yang cuma balikin SATU siklus (punya kandang yang
+    // login, atau siklus paling baru dimulai kalau bukan role kandang).
+    // Kalau ada lebih dari satu kandang jalan bersamaan, aktif() bakal
+    // "kehilangan" siklus lain begitu salah satunya panen duluan.
+    public function aktifSemua()
+    {
+        $data = SiklusKandang::where('status', 'berjalan')
+            ->orderByDesc('tanggal_mulai')
+            ->get(['id', 'user_id', 'tanggal_mulai']);
+
+        return response()->json(['data' => $data]);
+    }
+
    
     public function store(Request $request)
     {
