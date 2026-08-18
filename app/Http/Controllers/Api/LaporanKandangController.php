@@ -54,7 +54,11 @@ class LaporanKandangController extends Controller
 
     $rules = [
         'tanggal'          => 'required|date',
-        'jumlah_ayam_mati' => 'required|integer|min:0',
+        // Laporan pertama sebuah siklus dibuat begitu siklus mulai — belum
+        // masuk akal nanya jumlah ayam mati di titik ini, jadi opsional
+        // (default 0) khusus buat laporan pertama, sama seperti
+        // jumlah_ayam_awal di bawah.
+        'jumlah_ayam_mati' => $laporanTerakhir ? 'required|integer|min:0' : 'nullable|integer|min:0',
         'rata_rata_bobot'  => 'required|numeric|min:0',
         'catatan'          => 'nullable|string',
         'foto'             => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -66,6 +70,10 @@ class LaporanKandangController extends Controller
     }
 
     $validated = $request->validate($rules);
+
+    if (!$laporanTerakhir) {
+        $validated['jumlah_ayam_mati'] = $validated['jumlah_ayam_mati'] ?? 0;
+    }
 
     if ($laporanTerakhir) {
         // Ambil sisa ayam dari laporan sebelumnya

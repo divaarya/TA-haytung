@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/profile', function (Request $request) {
         return response()->json([
-            'user' => $request->user()
+            'user' => $request->user()->load('karyawan')
         ]);
     });
     Route::post('/profile', [AuthController::class, 'updateProfile']);
