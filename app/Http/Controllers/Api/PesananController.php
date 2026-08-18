@@ -28,7 +28,7 @@ class PesananController extends Controller
             'nama_pemesan' => 'required|string|max:255',
             'no_hp' => 'required|string|max:20',
             'keterangan' => 'nullable|string',
-            'total' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:1',
             'alamat_pengiriman' => 'required|string',
             'items' => 'required|array|min:1',
             'items.*.stok_id' => 'required|exists:stoks,id',
@@ -74,7 +74,7 @@ class PesananController extends Controller
             'nama_pemesan' => 'required|string|max:255',
             'no_hp' => 'required|string|max:20',
             'keterangan' => 'nullable|string',
-            'total' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:1',
             'alamat_pengiriman' => 'required|string',
             'items' => 'required|array|min:1',
             'items.*.stok_id' => 'required|exists:stoks,id',
@@ -157,6 +157,7 @@ class PesananController extends Controller
 
         $pesanan->items()->create([
             'stok_id'   => $stok->id,
+            'gudang'    => $stok->gudang,
             'jenis'     => $stok->jenis,
             'bobot'     => $stok->berat_per_item,
             'kuantitas' => $item['kuantitas'],

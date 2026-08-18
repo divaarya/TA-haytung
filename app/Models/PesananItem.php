@@ -9,6 +9,7 @@ class PesananItem extends Model
     protected $fillable = [
         'pesanan_id',
         'stok_id',
+        'gudang',
         'jenis',
         'bobot',
         'kuantitas',
