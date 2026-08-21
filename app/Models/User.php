@@ -18,12 +18,14 @@ class User extends Authenticatable
         'role',
         'foto',
 	'no_hp',
-	'status'
+	'status',
+	'fcm_token'
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'fcm_token',
     ];
 
     protected $casts = [
