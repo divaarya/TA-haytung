@@ -99,6 +99,30 @@ class AuthController extends Controller
         ]);
     }
 
+    // UPDATE FCM TOKEN
+    public function updateFcmToken(Request $request)
+    {
+        $validated = $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $request->user()->update(['fcm_token' => $validated['fcm_token']]);
+
+        return response()->json([
+            'message' => 'FCM token tersimpan'
+        ]);
+    }
+
+    // CLEAR FCM TOKEN (dipanggil pas logout)
+    public function clearFcmToken(Request $request)
+    {
+        $request->user()->update(['fcm_token' => null]);
+
+        return response()->json([
+            'message' => 'FCM token dihapus'
+        ]);
+    }
+
     // CHANGE PASSWORD
     public function changePassword(Request $request)
     {
