@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\PengirimanPanen;
 use App\Models\SiklusKandang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -94,22 +95,39 @@ class SiklusKandangController extends Controller
 
         $umurHari = now()->diffInDays($siklus->tanggal_mulai, true);
 
+        $rules = [
+            'jumlah_ayam_dikirim' => 'required|integer|min:1',
+            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ];
+        $messages = [];
+
         if ($umurHari < 70) {
-            $request->validate([
-                'catatan_panen_dini' => 'required|string',
-            ], [
-                'catatan_panen_dini.required' => 'Umur ayam belum 70 hari, wajib isi alasan panen dini.',
-            ]);
+            $rules['catatan_panen_dini'] = 'required|string';
+            $messages['catatan_panen_dini.required'] = 'Umur ayam belum 70 hari, wajib isi alasan panen dini.';
         }
+
+        $validated = $request->validate($rules, $messages);
+
+        $fotoPath = $request->file('foto')->store('pengiriman-panen', 'public');
 
         $siklus->update([
             'tanggal_panen' => now(),
             'status' => 'panen',
         ]);
 
+        $pengiriman = PengirimanPanen::create([
+            'siklus_id' => $siklus->id,
+            'user_id' => Auth::id(),
+            'jumlah_dikirim' => $validated['jumlah_ayam_dikirim'],
+            'foto' => $fotoPath,
+            'tanggal_kirim' => now()->toDateString(),
+            'status' => 'pending',
+        ]);
+
         return response()->json([
             'message' => 'Siklus berhasil ditandai panen',
             'data' => $siklus,
+            'pengiriman_panen' => $pengiriman,
         ]);
     }
 }
