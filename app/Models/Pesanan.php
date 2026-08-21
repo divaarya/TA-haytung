@@ -9,7 +9,9 @@ class Pesanan extends Model
     protected $fillable = [
         'nama_pemesan',
         'no_hp',
+        'bobot',
         'keterangan',
+        'kuantitas',
         'total',
         'alamat_pengiriman',
     ];
