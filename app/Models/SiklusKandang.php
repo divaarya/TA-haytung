@@ -25,6 +25,11 @@ class SiklusKandang extends Model
         return $this->hasMany(LaporanKandang::class, 'siklus_id');
     }
 
+    public function pengirimanPanen()
+    {
+        return $this->hasOne(PengirimanPanen::class, 'siklus_id');
+    }
+
     public function getUmurHariAttribute(): int
     {
         return now()->diffInDays($this->tanggal_mulai, true);

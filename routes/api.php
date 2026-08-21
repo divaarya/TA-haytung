@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\StokController;
 use App\Http\Controllers\Api\KaryawanController;
 use App\Http\Controllers\Api\SiklusKandangController;
+use App\Http\Controllers\Api\PengirimanPanenController;
 use App\Http\Controllers\Api\PesananController;
 use App\Http\Controllers\Api\GudangController;
 
@@ -138,6 +139,11 @@ Route::middleware('role:admin')->group(function () {
     Route::get('/siklus-kandang/aktif-semua', [SiklusKandangController::class, 'aktifSemua']);
     Route::post('/siklus-kandang', [SiklusKandangController::class, 'store']);
     Route::post('/siklus-kandang/{id}/panen', [SiklusKandangController::class, 'tandaiPanen']);
+
+    // PENGIRIMAN PANEN (kandang -> validasi gudang)
+    Route::get('/pengiriman-panen', [PengirimanPanenController::class, 'index']);
+    Route::get('/pengiriman-panen/{id}', [PengirimanPanenController::class, 'show']);
+    Route::post('/pengiriman-panen/{id}/validasi', [PengirimanPanenController::class, 'validasi']);
 
     Route::get('/laporan-gudang', [LaporanGudangController::class, 'index']);
     Route::post('/laporan-gudang', [LaporanGudangController::class, 'store']);
