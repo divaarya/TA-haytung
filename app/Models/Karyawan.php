@@ -15,6 +15,7 @@ class Karyawan extends Model
         'jenis_kelamin',
         'tanggal_bergabung',
         'role',
+        'gudang',
         'status',
         'nama_usaha',
         'alamat_usaha',

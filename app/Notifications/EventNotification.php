@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Channels\FcmChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -20,7 +21,7 @@ class EventNotification extends Notification
     // channel notifikasi
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database', FcmChannel::class];
     }
 
     // isi notifikasi
@@ -29,6 +30,20 @@ class EventNotification extends Notification
         return [
             'message' => 'Event baru: ' . $this->event->nama_kegiatan,
             'tanggal' => $this->event->tanggal
+        ];
+    }
+
+    // isi push FCM
+    public function toFcm($notifiable)
+    {
+        return [
+            'title' => 'Event baru: ' . $this->event->nama_kegiatan,
+            'body' => $this->event->deskripsi
+                ?: 'Tanggal: ' . $this->event->tanggal,
+            'data' => [
+                'type' => 'event',
+                'event_id' => $this->event->id,
+            ],
         ];
     }
 }

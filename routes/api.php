@@ -141,6 +141,7 @@ Route::middleware('role:admin')->group(function () {
     Route::post('/siklus-kandang/{id}/panen', [SiklusKandangController::class, 'tandaiPanen']);
 
     // PENGIRIMAN PANEN (kandang -> validasi gudang)
+    Route::get('/pengiriman-panen/summary', [PengirimanPanenController::class, 'summary']);
     Route::get('/pengiriman-panen', [PengirimanPanenController::class, 'index']);
     Route::get('/pengiriman-panen/{id}', [PengirimanPanenController::class, 'show']);
     Route::post('/pengiriman-panen/{id}/validasi', [PengirimanPanenController::class, 'validasi']);
