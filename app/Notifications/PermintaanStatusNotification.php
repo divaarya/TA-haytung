@@ -37,9 +37,9 @@ class PermintaanStatusNotification extends Notification
         return [
             'title' => $disetujui ? 'Permintaan Disetujui' : 'Permintaan Ditolak',
             'body' => $disetujui
-                ? $this->permintaan->nama_permintaan . ' telah disetujui.'
-                : $this->permintaan->nama_permintaan . ' ditolak'
-                    . ($this->permintaan->alasan_tolak ? ': ' . $this->permintaan->alasan_tolak : '.'),
+                ? "Permintaan \"{$this->permintaan->nama_permintaan}\" Anda telah disetujui."
+                : "Permintaan \"{$this->permintaan->nama_permintaan}\" Anda ditolak"
+                    . ($this->permintaan->alasan_tolak ? ", dengan alasan: {$this->permintaan->alasan_tolak}" : '.'),
             'data' => [
                 'type' => 'permintaan',
                 'permintaan_id' => $this->permintaan->id,

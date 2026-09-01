@@ -37,8 +37,8 @@ class PengirimanPanenValidatedNotification extends Notification
         return [
             'title' => $disetujui ? 'Kiriman Panen Disetujui' : 'Ada Selisih Penerimaan',
             'body' => $disetujui
-                ? "Gudang menerima {$this->pengiriman->jumlah_diterima} ekor sesuai kiriman kamu."
-                : "Gudang mencatat {$this->pengiriman->jumlah_diterima} ekor diterima (dikirim {$this->pengiriman->jumlah_dikirim} ekor)."
+                ? "Gudang telah menerima {$this->pengiriman->jumlah_diterima} ekor sesuai dengan kiriman Anda."
+                : "Gudang menerima {$this->pengiriman->jumlah_diterima} ekor dari {$this->pengiriman->jumlah_dikirim} ekor yang Anda kirim."
                     . ($this->pengiriman->keterangan ? ' ' . $this->pengiriman->keterangan : ''),
             'data' => [
                 'type' => 'pengiriman_panen',
