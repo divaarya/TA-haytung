@@ -36,10 +36,12 @@ class EventNotification extends Notification
     // isi push FCM
     public function toFcm($notifiable)
     {
+        $tanggal = \Carbon\Carbon::parse($this->event->tanggal)->translatedFormat('d M Y');
+
         return [
-            'title' => 'Event baru: ' . $this->event->nama_kegiatan,
+            'title' => $this->event->nama_kegiatan,
             'body' => $this->event->deskripsi
-                ?: 'Tanggal: ' . $this->event->tanggal,
+                ?: "Kegiatan baru telah dijadwalkan pada tanggal {$tanggal}.",
             'data' => [
                 'type' => 'event',
                 'event_id' => $this->event->id,
