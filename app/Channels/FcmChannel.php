@@ -23,22 +23,23 @@ class FcmChannel
             return;
         }
 
-        $payload = $notification->toFcm($notifiable);
-
-        $message = CloudMessage::fromArray([
-            'token' => $token,
-            'notification' => [
-                'title' => $payload['title'] ?? '',
-                'body' => $payload['body'] ?? '',
-            ],
-            'data' => array_map('strval', $payload['data'] ?? []),
-        ]);
-
-        // Resolusi Messaging & pengiriman dua-duanya dibungkus try/catch --
-        // kalau FIREBASE_CREDENTIALS belum/salah disetup di server, ini gak
-        // boleh ikut nggagalin aksi utama (mis. bikin Event), cukup dicatat
-        // di log.
+        // SEMUA yang berhubungan sama Firebase (bangun pesan, resolusi
+        // Messaging, kirim) dibungkus try/catch -- baik gagal karena
+        // package belum ke-install, credential belum/salah disetup, atau
+        // token invalid, sama sekali gak boleh ikut nggagalin aksi utama
+        // (mis. bikin Event/Permintaan/Validasi Panen). Cukup dicatat log.
         try {
+            $payload = $notification->toFcm($notifiable);
+
+            $message = CloudMessage::fromArray([
+                'token' => $token,
+                'notification' => [
+                    'title' => $payload['title'] ?? '',
+                    'body' => $payload['body'] ?? '',
+                ],
+                'data' => array_map('strval', $payload['data'] ?? []),
+            ]);
+
             app(Messaging::class)->send($message);
         } catch (Throwable $e) {
             Log::warning('Gagal kirim FCM push: ' . $e->getMessage(), [
