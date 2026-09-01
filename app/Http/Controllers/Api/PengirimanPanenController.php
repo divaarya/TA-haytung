@@ -28,6 +28,20 @@ class PengirimanPanenController extends Controller
         return response()->json(['data' => $query->get()]);
     }
 
+    // Total ayam hidup yang sudah tervalidasi tiba di gudang (disetujui
+    // maupun ditolak/selisih -- dua-duanya tetap ada jumlah_diterima aktual).
+    // Belum ada pemisahan per lokasi gudang karena pengiriman panen belum
+    // menyimpan gudang tujuan.
+    public function summary(Request $request)
+    {
+        $total = PengirimanPanen::whereIn('status', ['disetujui', 'ditolak'])
+            ->sum('jumlah_diterima');
+
+        return response()->json([
+            'data' => ['total_ayam_hidup' => (int) $total],
+        ]);
+    }
+
     public function show(Request $request, $id)
     {
         $pengiriman = PengirimanPanen::with(['user', 'siklus', 'validator'])->findOrFail($id);
