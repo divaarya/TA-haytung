@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengirimanPanen;
+use App\Notifications\PengirimanPanenValidatedNotification;
 use Illuminate\Http\Request;
 
 class PengirimanPanenController extends Controller
@@ -89,6 +90,8 @@ class PengirimanPanenController extends Controller
             'validated_by' => $request->user()->id,
             'validated_at' => now(),
         ]);
+
+        $pengiriman->user->notify(new PengirimanPanenValidatedNotification($pengiriman));
 
         return response()->json([
             'message' => 'Validasi berhasil disimpan',

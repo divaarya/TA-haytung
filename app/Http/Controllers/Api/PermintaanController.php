@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Permintaan;
+use App\Notifications\PermintaanStatusNotification;
 use Illuminate\Support\Facades\Storage;
 
 class PermintaanController extends Controller
@@ -147,6 +148,10 @@ class PermintaanController extends Controller
             'status' => $request->status,
             'alasan_tolak' => $request->alasan_tolak
         ]);
+
+        if (in_array($permintaan->status, ['disetujui', 'ditolak'])) {
+            $permintaan->user->notify(new PermintaanStatusNotification($permintaan));
+        }
 
         return response()->json([
             'message' => 'Status berhasil diupdate',
